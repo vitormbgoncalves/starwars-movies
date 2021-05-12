@@ -10,11 +10,11 @@ val kluent_version: String by project
 val mockk_version: String by project
 
 plugins {
-    kotlin("jvm") version "1.5.0"
+    kotlin("jvm")
     jacoco
-    id("org.jmailen.kotlinter") version "3.4.4"
-    id("io.gitlab.arturbosch.detekt") version "1.17.0-RC2"
-    id("com.adarshr.test-logger") version "3.0.0"
+    id("org.jmailen.kotlinter")
+    id("io.gitlab.arturbosch.detekt")
+    id("com.adarshr.test-logger")
 }
 
 apply {
@@ -31,21 +31,8 @@ allprojects {
         jcenter()
     }
 
-    dependencies {
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version")
-        implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
-
-        testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spek_version")
-        testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spek_version")
-        testImplementation("org.amshove.kluent:kluent:$kluent_version")
-        testImplementation("io.mockk:mockk:$mockk_version")
-    }
-
     apply(plugin = "kotlin")
     apply(plugin = "jacoco")
-    apply(plugin = "org.jmailen.kotlinter")
-    apply(plugin = "io.gitlab.arturbosch.detekt")
-    apply(plugin = "com.adarshr.test-logger")
 
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -87,6 +74,20 @@ subprojects {
                 xml.isEnabled = true
                 csv.isEnabled = false
             }
+        }
+
+        apply(plugin = "org.jmailen.kotlinter")
+        apply(plugin = "io.gitlab.arturbosch.detekt")
+        apply(plugin = "com.adarshr.test-logger")
+
+        dependencies {
+            implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version")
+            implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
+
+            testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spek_version")
+            testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spek_version")
+            testImplementation("org.amshove.kluent:kluent:$kluent_version")
+            testImplementation("io.mockk:mockk:$mockk_version")
         }
 
         kotlinter {
