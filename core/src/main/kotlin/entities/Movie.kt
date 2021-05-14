@@ -1,19 +1,22 @@
-package com.github.vitormbgoncalves.core.entities
+package com.github.vitormbgoncalves.starwarsmovies.core.entities
 
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 data class Movie(
-  val id: String,
-  val registrationDate: LocalDate,
+  val id: UUID = UUID.randomUUID(),
+  val registrationDate: LocalDateTime,
   val title: String,
+  val description: String,
   val series: Series,
   val trilogy: Trilogy?,
-  val US_releaseDate: LocalDate,
+  val usReleaseDate: LocalDate,
   val director: String,
   val screenwriters: List<String>,
   val storyBy: List<String>,
   val producers: List<String>,
-  val IMDB_score: Long
+  val imdbScore: Long
 )
 
 enum class Trilogy {

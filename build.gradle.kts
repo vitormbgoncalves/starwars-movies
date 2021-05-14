@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 val logback_version: String by project
 val ktor_version: String by project
 val kotlin_version: String by project
+val kotlinLanguage_version: String by project
 val spek_version: String by project
 val kluent_version: String by project
 val mockk_version: String by project
@@ -12,7 +13,7 @@ val mockk_version: String by project
 plugins {
     kotlin("jvm")
     jacoco
-    id("org.jmailen.kotlinter")
+    id("org.jlleitschuh.gradle.ktlint")
     id("io.gitlab.arturbosch.detekt")
     id("com.adarshr.test-logger")
 }
@@ -22,13 +23,14 @@ apply {
 }
 
 allprojects {
-    group = "com.github.vitormbgoncalves"
+    group = "com.github.vitormbgoncalves.starwarsmovies"
     version = "0.0.1-SNAPSHOT"
 
     repositories {
         mavenLocal()
         mavenCentral()
         jcenter()
+        maven(url = "https://jitpack.io")
     }
 
     apply(plugin = "kotlin")
@@ -44,8 +46,8 @@ subprojects {
     tasks {
         withType<KotlinCompile<*>> {
             kotlinOptions {
-                languageVersion = kotlin_version
-                apiVersion = kotlin_version
+                languageVersion = kotlinLanguage_version
+                apiVersion = kotlinLanguage_version
                 (this as KotlinJvmOptions).jvmTarget =
                     JavaVersion.VERSION_1_8.toString()
                 freeCompilerArgs = listOfNotNull(
@@ -70,13 +72,9 @@ subprojects {
 
         jacocoTestReport {
             dependsOn(test)
-            reports {
-                xml.isEnabled = true
-                csv.isEnabled = false
-            }
         }
 
-        apply(plugin = "org.jmailen.kotlinter")
+        apply(plugin = "org.jlleitschuh.gradle.ktlint")
         apply(plugin = "io.gitlab.arturbosch.detekt")
         apply(plugin = "com.adarshr.test-logger")
 
@@ -90,25 +88,21 @@ subprojects {
             testImplementation("io.mockk:mockk:$mockk_version")
         }
 
-        kotlinter {
-            ignoreFailures = true
-            indentSize = 4
-            reporters = arrayOf("checkstyle", "plain")
-            experimentalRules = false
-            disabledRules = emptyArray()
+        configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+            debug.set(true)
+            outputToConsole.set(true)
+            outputColorName.set("RED")
         }
 
         detekt {
+            config = files("config/detekt/detekt.yml")
             buildUponDefaultConfig = true
-            allRules = false
-            config = files("$projectDir/detekt/config.yml")
-            baseline = file("$projectDir/detekt/baseline.xml")
 
             reports {
                 html.enabled = true
-                xml.enabled = true
-                txt.enabled = true
-                sarif.enabled = true
+                xml.enabled = false
+                txt.enabled = false
+                sarif.enabled = false
             }
         }
 
