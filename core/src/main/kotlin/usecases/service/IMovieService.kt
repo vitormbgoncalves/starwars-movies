@@ -1,15 +1,15 @@
-package com.github.vitormbgoncalves.starwarsmovies.core.usecases.repository
+package com.github.vitormbgoncalves.starwarsmovies.core.usecases.service
 
 import com.github.vitormbgoncalves.starwarsmovies.core.entities.Movie
 
 /**
- * Repository interface
+ * Movie service interface
  *
  * @author Vitor Goncalves
- * @since 14.05.2021, sex, 17:13
+ * @since 14.05.2021, sex, 17:14
  */
 
-interface IMovieRepository {
+interface IMovieService {
   suspend fun findAll(): List<Movie>
   suspend fun findById(id: String): Movie?
   suspend fun create(movie: Movie): Boolean

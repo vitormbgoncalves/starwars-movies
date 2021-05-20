@@ -12,6 +12,7 @@ val mockk_version: String by project
 
 plugins {
     kotlin("jvm")
+    kotlin("plugin.serialization")
     jacoco
     id("org.jlleitschuh.gradle.ktlint")
     id("io.gitlab.arturbosch.detekt")
@@ -79,9 +80,11 @@ subprojects {
         apply(plugin = "com.adarshr.test-logger")
 
         dependencies {
+            // Kotlin
             implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version")
             implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
 
+            // Test
             testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spek_version")
             testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spek_version")
             testImplementation("org.amshove.kluent:kluent:$kluent_version")

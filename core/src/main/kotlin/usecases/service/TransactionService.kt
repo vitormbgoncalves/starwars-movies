@@ -1,5 +1,12 @@
 package com.github.vitormbgoncalves.starwarsmovies.core.usecases.service
 
+/**
+ * Transactional configuration file
+ *
+ * @author Vitor Goncalves
+ * @since 14.05.2021, sex, 17:13
+ */
+
 interface TransactionService {
   /** Always starts new transaction. */
   @RequiresTransactionContext
