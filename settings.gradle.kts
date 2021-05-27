@@ -19,4 +19,5 @@ rootProject.name = "starwars-movies"
 include("core")
 include("interfaces")
 include("database")
+include("common-lib")
 include("infrastructure")

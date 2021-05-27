@@ -10,9 +10,10 @@ import com.github.vitormbgoncalves.starwarsmovies.core.entities.Movie
  */
 
 interface IMovieRepository {
-  suspend fun findAll(): List<Movie>
+  suspend fun findAll(page: Int, size: Int): List<Movie>
   suspend fun findById(id: String): Movie?
-  suspend fun create(movie: Movie): Boolean
-  suspend fun update(id: String, movie: Movie): Boolean
-  suspend fun delete(id: String): Boolean
+  suspend fun create(movie: Movie): Movie
+  suspend fun update(id: String, movie: Movie): Movie?
+  suspend fun delete(id: String)
+  suspend fun totalMovies(): Long
 }

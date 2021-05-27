@@ -1,19 +1,31 @@
 package com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes
 
-import com.github.vitormbgoncalves.starwarsmovies.interfaces.MovieController
-import com.github.vitormbgoncalves.starwarsmovies.interfaces.NewMovieDTO
+import com.github.vitormbgoncalves.starwarsmovies.infrastructure.openAPIGeneratorConfig.PageQuery
+import com.github.vitormbgoncalves.starwarsmovies.infrastructure.openAPIGeneratorConfig.StringParam
+import com.github.vitormbgoncalves.starwarsmovies.infrastructure.openAPIGeneratorConfig.Tag
+import com.github.vitormbgoncalves.starwarsmovies.interfaces.controller.MovieController
+import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.ReponseAllMovies
+import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.RequestMovieDTO
+import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.ResponseMovieDTO
+import com.papsign.ktor.openapigen.openAPIGen
+import com.papsign.ktor.openapigen.route.apiRouting
+import com.papsign.ktor.openapigen.route.info
+import com.papsign.ktor.openapigen.route.path.normal.delete
+import com.papsign.ktor.openapigen.route.path.normal.get
+import com.papsign.ktor.openapigen.route.path.normal.post
+import com.papsign.ktor.openapigen.route.path.normal.put
+import com.papsign.ktor.openapigen.route.response.respond
+import com.papsign.ktor.openapigen.route.route
+import com.papsign.ktor.openapigen.route.status
+import com.papsign.ktor.openapigen.route.tag
+import com.papsign.ktor.openapigen.route.throws
+import io.ktor.application.application
 import io.ktor.application.call
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.request.receive
 import io.ktor.response.respond
-import io.ktor.response.respondText
+import io.ktor.response.respondRedirect
 import io.ktor.routing.Routing
-import io.ktor.routing.delete
 import io.ktor.routing.get
-import io.ktor.routing.post
-import io.ktor.routing.put
-import io.ktor.routing.route
 import org.koin.ktor.ext.inject
 
 /**
@@ -27,43 +39,78 @@ fun Routing.route() {
 
   val movieController: MovieController by inject()
 
-  route("/star-wars") {
-    get("/movies") {
-      val movies = movieController.getAllMovies()
-      call.respond(movies)
-    }
-    get("/movies/{id}") {
-      val id: String = call.parameters["id"] ?: return@get
-      val movie = movieController.getMovie(id)
-      if (movie != null) {
-        call.respond(movie)
-      } else {
-        call.respondText("Movie with this id not found!", ContentType.Text.Plain, HttpStatusCode.NotFound)
-      }
-    }
-    post("/movies") {
-      val movie = call.receive<NewMovieDTO>()
-      if (movieController.createMovie(movie)) {
-        call.respond(HttpStatusCode.Created)
-      } else {
-        call.respondText("Movie not registered!", ContentType.Text.Plain, HttpStatusCode.NotFound)
-      }
-    }
-    put("/movies/{id}") {
-      val id = call.parameters["id"] ?: return@put
-      val movie = call.receive<NewMovieDTO>()
-      if (movieController.updateMovie(id, movie)) {
-        call.respond(HttpStatusCode.NoContent)
-      } else {
-        call.respondText("Movie with this id not found!", ContentType.Text.Plain, HttpStatusCode.NotFound)
-      }
-    }
-    delete("/movies/{id}") {
-      val id = call.parameters["id"] ?: return@delete
-      if (movieController.deleteMovie(id)) {
-        call.respond(HttpStatusCode.NoContent)
-      } else {
-        call.respondText("Movie with this id not found!", ContentType.Text.Plain, HttpStatusCode.NotFound)
+  get("/openapi.json") {
+    call.respond(application.openAPIGen.api.serialize())
+  }
+  get("/") {
+    call.respondRedirect("/swagger-ui/index.html?url=/openapi.json", true)
+  }
+
+  apiRouting {
+    route("star-wars/movies") {
+      tag(Tag.`Star Wars films`) {
+        throws(
+          HttpStatusCode.NotFound,
+          Exception().localizedMessage,
+          { ex: Exception -> ex.message }
+        ) {
+
+          status(200) {
+            get<PageQuery, ReponseAllMovies>(
+              info(
+                summary = "Find all movies.",
+                description = "Find all movies with pagination."
+              )
+            ) { (page, size) ->
+              respond(movieController.getMoviesPage(page, size))
+            }
+
+            get<StringParam, ResponseMovieDTO>(
+              info(
+                summary = "Find movie.",
+                description = "Find movie by id."
+              ),
+              example = ResponseMovie
+            ) { (id) ->
+              respond(movieController.getMovie(id) ?: return@get)
+            }
+
+            put<StringParam, ResponseMovieDTO, RequestMovieDTO>(
+              info(
+                summary = "Update movie.",
+                description = "Update movie by id."
+              ),
+              exampleRequest = RequestMovie,
+              exampleResponse = ResponseMovie
+            ) { (id), body ->
+              respond(movieController.updateMovie(id, body) ?: return@put)
+            }
+          }
+
+          status(201) {
+            post<Unit, ResponseMovieDTO, RequestMovieDTO>(
+              info(
+                summary = "Register movie.",
+                description = "Register new movie."
+              ),
+              exampleRequest = RequestMovie,
+              exampleResponse = ResponseMovie
+            ) { _, body ->
+              respond(movieController.createMovie(body))
+            }
+          }
+
+          status(204) {
+            delete<StringParam, Unit>(
+              info(
+                summary = "Delete movie.",
+                description = "Delete movie by id."
+              )
+            ) { (id) ->
+              respond(movieController.deleteMovie(id))
+            }
+          }
+        }
       }
     }
   }

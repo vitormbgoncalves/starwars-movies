@@ -4,6 +4,6 @@ dependencies {
     // Module dependencies
     implementation(project(":core"))
 
-    // KMongo dependencies
+    // KMongo
     implementation("org.litote.kmongo:kmongo-coroutine-serialization:$kmongo_version")
 }

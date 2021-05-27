@@ -18,17 +18,19 @@ import java.time.LocalDateTime
 @Serializable
 data class Movie(
   @Contextual @SerialName("_id") val id: Id<Movie> = newId(),
-  @Contextual val registrationDate: LocalDateTime = LocalDateTime.now(),
   val title: String,
-  val description: String,
+  val episode_id: Long? = null,
+  val storyline: String,
   val series: Series,
-  val trilogy: Trilogy?,
-  @Contextual val usReleaseDate: LocalDate,
+  val trilogy: Trilogy? = null,
+  @Contextual val release_date: LocalDate,
   val director: String,
   val screenwriters: List<String>,
   val storyBy: List<String>,
   val producers: List<String>,
-  val imdbScore: Double
+  val imdb_score: Double,
+  @Contextual val created: LocalDateTime = LocalDateTime.now(),
+  @Contextual val edited: LocalDateTime = LocalDateTime.now(),
 )
 
 enum class Trilogy {

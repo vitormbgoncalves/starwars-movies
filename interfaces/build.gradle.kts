@@ -1,5 +1,6 @@
 val jackson_version: String by project
 val kmongo_version: String by project
+val ktorOpenAPIGenerator: String by project
 
 dependencies {
     // Module dependencies
@@ -10,4 +11,7 @@ dependencies {
 
     // KMongo Id type
     implementation("org.litote.kmongo:kmongo-id:$kmongo_version")
+
+    // Ktor OpenAPI Generator
+    implementation("com.github.papsign:Ktor-OpenAPI-Generator:$ktorOpenAPIGenerator")
 }
