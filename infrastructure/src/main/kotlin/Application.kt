@@ -1,12 +1,5 @@
 package com.github.vitormbgoncalves.starwarsmovies.infrastructure
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.core.util.DefaultIndenter
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationConfig
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.module.KoinModuleBuilder
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes.route
 import com.github.vitormbgoncalves.starwarsmovies.mapper.ObjectMapperBuilder

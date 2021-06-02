@@ -6,7 +6,6 @@ import com.github.vitormbgoncalves.starwarsmovies.core.usecases.service.MovieSer
 import com.github.vitormbgoncalves.starwarsmovies.database.MongoDBMovieRepository
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.controller.MovieController
 import com.typesafe.config.ConfigFactory
-import io.ktor.config.HoconApplicationConfig
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import org.litote.kmongo.coroutine.coroutine
@@ -32,7 +31,7 @@ val KoinModuleBuilder: Module = module(createdAtStart = true) {
   // MongoDB Client
   single {
     KMongo.createClient(
-      HoconApplicationConfig(ConfigFactory.load("mongodb.conf")).property("connectionString").getString()
+      ConfigFactory.load("mongodb.conf").getString("MONGO_URI")
     ).coroutine
   }
 }

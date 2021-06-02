@@ -1,5 +1,6 @@
 package com.github.vitormbgoncalves.starwarsmovies.mapper
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.DeserializationFeature
@@ -40,7 +41,7 @@ object ObjectMapperBuilder {
 
     disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
 
-    /*setSerializationInclusion(JsonInclude.Include.NON_NULL)*/
+    setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
     setDefaultPrettyPrinter(
       DefaultPrettyPrinter().apply {

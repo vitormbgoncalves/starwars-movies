@@ -4,8 +4,8 @@ import com.github.vitormbgoncalves.starwarsmovies.infrastructure.openAPIGenerato
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.openAPIGeneratorConfig.StringParam
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.openAPIGeneratorConfig.Tag
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.controller.MovieController
-import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.ReponseAllMovies
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.RequestMovieDTO
+import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.ResponseAllMovies
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.ResponseMovieDTO
 import com.papsign.ktor.openapigen.openAPIGen
 import com.papsign.ktor.openapigen.route.apiRouting
@@ -56,12 +56,14 @@ fun Routing.route() {
         ) {
 
           status(200) {
-            get<PageQuery, ReponseAllMovies>(
+            get<PageQuery, ResponseAllMovies>(
               info(
                 summary = "Find all movies.",
                 description = "Find all movies with pagination."
-              )
+              ),
+              example = responseAllMovies
             ) { (page, size) ->
+
               respond(movieController.getMoviesPage(page, size))
             }
 
@@ -70,7 +72,7 @@ fun Routing.route() {
                 summary = "Find movie.",
                 description = "Find movie by id."
               ),
-              example = ResponseMovie
+              example = responseMovie
             ) { (id) ->
               respond(movieController.getMovie(id) ?: return@get)
             }
@@ -80,8 +82,8 @@ fun Routing.route() {
                 summary = "Update movie.",
                 description = "Update movie by id."
               ),
-              exampleRequest = RequestMovie,
-              exampleResponse = ResponseMovie
+              exampleRequest = requestMovie,
+              exampleResponse = responseMovie
             ) { (id), body ->
               respond(movieController.updateMovie(id, body) ?: return@put)
             }
@@ -93,8 +95,8 @@ fun Routing.route() {
                 summary = "Register movie.",
                 description = "Register new movie."
               ),
-              exampleRequest = RequestMovie,
-              exampleResponse = ResponseMovie
+              exampleRequest = requestMovie,
+              exampleResponse = responseMovie
             ) { _, body ->
               respond(movieController.createMovie(body))
             }

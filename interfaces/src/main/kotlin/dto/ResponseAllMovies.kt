@@ -1,5 +1,6 @@
 package com.github.vitormbgoncalves.starwarsmovies.interfaces.dto
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.papsign.ktor.openapigen.annotations.Response
 
 /**
@@ -10,9 +11,10 @@ import com.papsign.ktor.openapigen.annotations.Response
  */
 
 @Response("All movies response.")
-data class ReponseAllMovies(
+data class ResponseAllMovies(
+  @JsonProperty("_links") val links: HalLink,
+  @JsonProperty("_embedded")val embedded: Map<String, List<ResponseMovieDTO>>,
   val info: PagingInfo,
-  val results: List<ResponseMovieDTO>
 )
 
-data class PagingInfo(var count: Int, var pages: Int, var next: Int?, var prev: Int?)
+class PagingInfo(val count: Int, val pages: Int)
