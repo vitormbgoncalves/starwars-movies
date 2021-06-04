@@ -2,7 +2,6 @@ package com.github.vitormbgoncalves.starwarsmovies.database
 
 import com.github.vitormbgoncalves.starwarsmovies.core.entities.Movie
 import com.github.vitormbgoncalves.starwarsmovies.core.usecases.repository.IMovieRepository
-import java.time.LocalDateTime
 import org.bson.types.ObjectId
 import org.litote.kmongo.coroutine.CoroutineClient
 import org.litote.kmongo.coroutine.CoroutineCollection
@@ -10,6 +9,7 @@ import org.litote.kmongo.eq
 import org.litote.kmongo.id.toId
 import org.litote.kmongo.set
 import org.litote.kmongo.setTo
+import java.time.LocalDateTime
 
 /**
  * MongoDB repository implementation with KMongo - a Kotlin toolkit for Mongo

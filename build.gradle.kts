@@ -37,6 +37,10 @@ allprojects {
     apply(plugin = "kotlin")
     apply(plugin = "jacoco")
 
+    jacoco {
+        toolVersion = "0.8.7"
+    }
+
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -83,6 +87,7 @@ subprojects {
             // Kotlin
             implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version")
             implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_version")
 
             // Test
             testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spek_version")
