@@ -115,12 +115,22 @@ subprojects {
         }
 
         testlogger {
-            showStackTraces = false
-            showCauses = false
-            showSimpleNames = true
+            theme = com.adarshr.gradle.testlogger.theme.ThemeType.MOCHA
             showExceptions = true
+            showStackTraces = true
+            showFullStackTraces = false
+            showCauses = true
+            slowThreshold = 0
+            showSummary = true
+            showSimpleNames = false
             showPassed = true
+            showSkipped = true
+            showFailed = true
             showStandardStreams = false
+            showPassedStandardStreams = true
+            showSkippedStandardStreams = true
+            showFailedStandardStreams = true
+            logLevel = LogLevel.LIFECYCLE
         }
     }
 }

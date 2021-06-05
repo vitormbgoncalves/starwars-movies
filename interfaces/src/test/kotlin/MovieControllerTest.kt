@@ -1,4 +1,4 @@
-package com.github.vitormbgoncalves.starwarsmovies.interfaces.testing
+package com.github.vitormbgoncalves.starwarsmovies.interfaces.test
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -8,24 +8,26 @@ import com.github.vitormbgoncalves.starwarsmovies.core.entities.Series
 import com.github.vitormbgoncalves.starwarsmovies.core.entities.Trilogy
 import com.github.vitormbgoncalves.starwarsmovies.core.usecases.service.MovieServiceImpl
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.controller.MovieController
-import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.HalLink
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.RequestMovieDTO
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.ResponseAllMovies
-import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.ResponseMovieDTO
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Month
 import kotlinx.coroutines.runBlocking
+import org.amshove.kluent.coInvoking
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeInstanceOf
+import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldContain
+import org.amshove.kluent.shouldThrow
+import org.amshove.kluent.withMessage
 import org.litote.kmongo.toId
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Month
 
 /**
  * Movie controller test
@@ -49,51 +51,69 @@ object MovieControllerTest : Spek({
       clearMocks(mockMovieService)
     }
 
-    it("Get all movies") {
+    it("get all movies") {
       runBlocking {
         coEvery { mockMovieService.findAll(any(), any()) } returns listOf(movie)
-        val movies = mapper.writeValueAsString(movieController.getAllMovies(1, 1))
-        movies shouldContain movieJson
+        val movies = movieController.getAllMovies(1, 1)
+        mapper.writeValueAsString(movies) shouldContain movieJson
         coVerify { mockMovieService.findAll(1, 1) }
       }
     }
 
-    it("Get movie by id") {
+    it("get movie by id") {
       runBlocking {
-        coEvery { mockMovieService.findById(any()) } returns movie
-        val movie = mapper.writeValueAsString(movieController.getMovie("60afdbe0b3c7c176f1f7988c"))
-        movie shouldBeEqualTo movieJson
+        coEvery { mockMovieService.findById("60afdbe0b3c7c176f1f7988c") } returns movie
+        val movie = movieController.getMovie("60afdbe0b3c7c176f1f7988c")
+        mapper.writeValueAsString(movie) shouldBeEqualTo movieJson
         coVerify { mockMovieService.findById("60afdbe0b3c7c176f1f7988c") }
       }
     }
-    it("Creat movie") {
+    it("do not get movie with incorret id") {
+      runBlocking {
+        coEvery { mockMovieService.findById(any()) } returns null
+        movieController.getMovie("60afdbe0b3c7c176f1f7988d").shouldBeNull()
+        coVerify { mockMovieService.findById("60afdbe0b3c7c176f1f7988d") }
+      }
+    }
+    it("creat movie") {
       runBlocking {
         coEvery { mockMovieService.create(any()) } returns movie
-        val movie = mapper.writeValueAsString(movieController.createMovie(requestMovie))
-        movie shouldBeEqualTo movieJson
+        val movie = movieController.createMovie(requestMovie)
+        mapper.writeValueAsString(movie) shouldBeEqualTo movieJson
         coVerify { mockMovieService.create(any()) }
       }
     }
-    it("Update movie") {
+    it("update movie") {
       runBlocking {
         coEvery { mockMovieService.update(any(), any()) } returns movie
-        val movie = mapper.writeValueAsString(movieController.updateMovie("60afdbe0b3c7c176f1f7988c", requestMovie))
-        movie shouldBeEqualTo movieJson
+        val movie = movieController.updateMovie("60afdbe0b3c7c176f1f7988c", requestMovie)
+        mapper.writeValueAsString(movie) shouldBeEqualTo movieJson
         coVerify { mockMovieService.update(any(), any()) }
       }
     }
-    it("Delete movie") {
+    it("do not update movie with incorret id") {
+      runBlocking {
+        coEvery { mockMovieService.update(any(), any()) } returns null
+        movieController.updateMovie("60afdbe0b3c7c176f1f7988c", requestMovie).shouldBeNull()
+        coVerify { mockMovieService.update(any(), any()) }
+      }
+    }
+    it("delete movie") {
       runBlocking {
         coEvery { mockMovieService.delete(any()) } returns Unit
         movieController.deleteMovie("60afdbe0b3c7c176f1f7988c")
         coVerify { mockMovieService.delete("60afdbe0b3c7c176f1f7988c") }
       }
     }
-    it("Get movies with pagination") {
+    it("get movies with pagination") {
       runBlocking {
         coEvery { mockMovieService.findAll(any(), any()) } returns listOf(movie)
         coEvery { mockMovieService.totalMovies() } returns 1
-        movieController.getMoviesPage(1, 1) shouldBeInstanceOf ResponseAllMovies::class
+        coInvoking { movieController.getMoviesPage(0, 0) } shouldThrow IllegalArgumentException::class withMessage
+          "/ by zero"
+        val movies = movieController.getMoviesPage(1, 1)
+        movies shouldBeInstanceOf ResponseAllMovies::class
+        mapper.writeValueAsString(movies) shouldBeEqualTo allMoviesJson
         coVerify { mockMovieService.findAll(0, 1) }
         coVerify { mockMovieService.totalMovies() }
       }
@@ -132,7 +152,7 @@ private val requestMovie = RequestMovieDTO(
   8.6
 )
 
-private val movieJson =
+private const val movieJson =
   "{\"_links\":{\"self\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies/60ac1ae25a74bf51382c469e\"}}," +
     "\"id\":\"60ac1ae25a74bf51382c469e\"," +
     "\"title\":\"A New Hope\"," +
@@ -148,3 +168,29 @@ private val movieJson =
     "\"imdb_score\":8.6," +
     "\"created\":[2021,6,2,6,30,40,50000]," +
     "\"edited\":[2021,6,2,6,30,40,50000]}"
+
+private const val allMoviesJson =
+  "{\"_links\":{\"self\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies?page=1&size=1\"}," +
+    "\"first\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies/?page=1&size=1\"}," +
+    "\"prev\":{}," +
+    "\"next\":{}," +
+    "\"last\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies?page=1&size=1\"}," +
+    "\"curries\":{\"name\":\"ns\",\"href\":\"http://127.0.0.1:8080/star-wars\"," +
+    "\"templated\":\"true\"}}," +
+    "\"_embedded\":{\"ns:movies\":[{" +
+    "\"_links\":{\"self\":{\"href\":\"/movies/60ac1ae25a74bf51382c469e\"}}," +
+    "\"id\":\"60ac1ae25a74bf51382c469e\"," +
+    "\"title\":\"A New Hope\"," +
+    "\"episode_id\":4," +
+    "\"storyline\":\"Princess Leia is captured...\"," +
+    "\"series\":\"SKYWALKER_SAGA\"," +
+    "\"trilogy\":\"ORIGINAL\"," +
+    "\"release_date\":\"1977-05-25\"," +
+    "\"director\":\"George Lucas\"," +
+    "\"screenwriters\":[\"George Lucas\"]," +
+    "\"storyBy\":[\"George Lucas\"]," +
+    "\"producers\":[\"Gary Kurtz\"]," +
+    "\"imdb_score\":8.6," +
+    "\"created\":[2021,6,2,6,30,40,50000]," +
+    "\"edited\":[2021,6,2,6,30,40,50000]}]}," +
+    "\"info\":{\"count\":1,\"pages\":1}}"

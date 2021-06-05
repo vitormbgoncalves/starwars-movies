@@ -12,7 +12,7 @@ import org.litote.kmongo.setTo
 import java.time.LocalDateTime
 
 /**
- * MongoDB repository implementation with KMongo - a Kotlin toolkit for Mongo
+ * MongoDB repository implementation with KMongo
  *
  * @author Vitor Goncalves
  * @since 14.05.2021, sex, 18:12
@@ -20,11 +20,11 @@ import java.time.LocalDateTime
 
 class MongoDBMovieRepository(client: CoroutineClient) : IMovieRepository {
 
-  lateinit var moviesCollection: CoroutineCollection<Movie>
+  var moviesCollection: CoroutineCollection<Movie>
 
   init {
     val database = client.getDatabase("movies")
-    moviesCollection = database.getCollection<Movie>("movies")
+    moviesCollection = database.getCollection("movies")
   }
 
   override suspend fun findAll(page: Int, size: Int): List<Movie> {
