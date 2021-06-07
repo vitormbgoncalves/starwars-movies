@@ -1,4 +1,4 @@
-package com.github.vitormbgoncalves.starwarsmovies.mapper
+package com.github.vitormbgoncalves.starwarsmovies.commonlib.mapper
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.util.DefaultIndenter

@@ -1,8 +1,9 @@
 package com.github.vitormbgoncalves.starwarsmovies.infrastructure
 
+import com.github.vitormbgoncalves.starwarsmovies.commonlib.mapper.ObjectMapperBuilder
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.module.KoinModuleBuilder
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes.route
-import com.github.vitormbgoncalves.starwarsmovies.mapper.ObjectMapperBuilder
+import com.github.vitormbgoncalves.starwarsmovies.interfaces.controller.MovieController
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.schema.namer.DefaultSchemaNamer
 import com.papsign.ktor.openapigen.schema.namer.SchemaNamer
@@ -19,10 +20,12 @@ import io.ktor.jackson.jackson
 import io.ktor.request.path
 import io.ktor.response.respondText
 import io.ktor.routing.routing
+import io.ktor.server.netty.EngineMain
 import org.koin.ktor.ext.Koin
 import org.koin.logger.SLF4JLogger
 import org.slf4j.event.Level
 import kotlin.reflect.KType
+import org.koin.ktor.ext.inject
 
 /**
  * Ktor main file
@@ -31,11 +34,24 @@ import kotlin.reflect.KType
  * @since 18.05.2021, ter, 20:23
  */
 
-fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
+fun main(args: Array<String>): Unit = EngineMain.main(args)
 
 @Suppress("unused") // Referenced in application.conf
-@kotlin.jvm.JvmOverloads
-fun Application.main(testing: Boolean = false) {
+fun Application.main() {
+
+  install(Koin) {
+    SLF4JLogger()
+    modules(
+      KoinModuleBuilder
+    )
+  }
+
+  val movieController: MovieController by inject()
+
+  moduleWithDependencies(movieController)
+}
+
+fun Application.moduleWithDependencies(movieController: MovieController) {
 
   install(OpenAPIGen) {
     info {
@@ -71,13 +87,6 @@ fun Application.main(testing: Boolean = false) {
     filter { call -> call.request.path().startsWith("/") }
   }
 
-  install(Koin) {
-    SLF4JLogger()
-    modules(
-      KoinModuleBuilder
-    )
-  }
-
   install(StatusPages) {
     this.exception<Throwable> { e ->
       call.respondText(e.localizedMessage, ContentType.Text.Plain)
@@ -87,6 +96,6 @@ fun Application.main(testing: Boolean = false) {
 
   routing {
     trace { application.log.trace(it.buildText()) }
-    route()
+    route(movieController)
   }
 }

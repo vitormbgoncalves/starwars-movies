@@ -26,7 +26,6 @@ import io.ktor.response.respond
 import io.ktor.response.respondRedirect
 import io.ktor.routing.Routing
 import io.ktor.routing.get
-import org.koin.ktor.ext.inject
 
 /**
  * Ktor routing controller
@@ -35,9 +34,7 @@ import org.koin.ktor.ext.inject
  * @since 18.05.2021, ter, 11:02
  */
 
-fun Routing.route() {
-
-  val movieController: MovieController by inject()
+fun Routing.route(movieController: MovieController) {
 
   get("/openapi.json") {
     call.respond(application.openAPIGen.api.serialize())

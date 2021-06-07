@@ -10,6 +10,13 @@ val spek_version: String by project
 val kluent_version: String by project
 val mockk_version: String by project
 
+val jacocoExcludes = listOf(
+    "**/core/**",
+    "**/commonlib/**",
+    "**/openAPIGeneratorConfig/**",
+    "**/module"
+)
+
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")

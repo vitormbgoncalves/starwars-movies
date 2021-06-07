@@ -56,3 +56,59 @@ task<JacocoReport>("jacocoFullReport") {
         additionalSourceDirs.from(project.files(reportTasks.mapNotNull { it.sourceDirectories }))
     }
 }
+
+// jacoco test reports excluded packages
+val jacocoExcludes = listOf(
+    "**/core/**",
+    "**/commonlib/**",
+    "**/openAPIGeneratorConfig/**",
+    "**/module"
+)
+
+@Suppress("UnstableApiUsage")
+tasks {
+    withType<JacocoReport> {
+        reports {
+            html.destination = file("$buildDir/reports/jacoco/jacocoFullReport")
+        }
+        afterEvaluate {
+            classDirectories.setFrom(
+                files(
+                    classDirectories.files.map {
+                        fileTree(it) {
+                            setExcludes(jacocoExcludes)
+                        }
+                    }
+                )
+            )
+        }
+    }
+
+    withType<JacocoCoverageVerification> {
+        violationRules {
+            rule {
+                limit {
+                    counter = "INSTRUCTION"
+                    minimum = "0.90".toBigDecimal()
+                }
+            }
+            rule {
+                limit {
+                    counter = "BRANCH"
+                    minimum = "0.80".toBigDecimal()
+                }
+            }
+        }
+        afterEvaluate {
+            classDirectories.setFrom(
+                files(
+                    classDirectories.files.map {
+                        fileTree(it) {
+                            setExcludes(jacocoExcludes)
+                        }
+                    }
+                )
+            )
+        }
+    }
+}
