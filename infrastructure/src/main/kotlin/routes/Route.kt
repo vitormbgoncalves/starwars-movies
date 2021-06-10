@@ -1,5 +1,7 @@
 package com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes
 
+import cn.zenliu.ktor.redis.RedisFactory
+import com.github.vitormbgoncalves.starwarsmovies.commonlib.mapper.Json
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.openAPIGeneratorConfig.PageQuery
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.openAPIGeneratorConfig.StringParam
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.openAPIGeneratorConfig.Tag
@@ -26,6 +28,11 @@ import io.ktor.response.respond
 import io.ktor.response.respondRedirect
 import io.ktor.routing.Routing
 import io.ktor.routing.get
+import io.lettuce.core.codec.StringCodec
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import org.slf4j.LoggerFactory
 
 /**
  * Ktor routing controller
@@ -35,6 +42,10 @@ import io.ktor.routing.get
  */
 
 fun Routing.route(movieController: MovieController) {
+
+  val client = RedisFactory.newReactiveClient(StringCodec.UTF8)
+
+  val logger = LoggerFactory.getLogger(Routing::class.java)
 
   get("/openapi.json") {
     call.respond(application.openAPIGen.api.serialize())
@@ -60,8 +71,18 @@ fun Routing.route(movieController: MovieController) {
               ),
               example = responseAllMovies
             ) { (page, size) ->
+              val movies = movieController.getMoviesPage(page, size)
+              val result = client.get("page=$page&size=$size").awaitSingleOrNull()
 
-              respond(movieController.getMoviesPage(page, size))
+              result?.let {
+                respond(Json.decodeFromString(it))
+                logger.trace("Data from Redis")
+              } ?: run {
+                client.set("page=$page&size=$size", Json.encodeToString(movies)).subscribe()
+                client.expire("page=$page&size=$size", 20).subscribe()
+                logger.trace("Data from MongoDB")
+                respond(movies)
+              }
             }
 
             get<StringParam, ResponseMovieDTO>(
@@ -71,7 +92,17 @@ fun Routing.route(movieController: MovieController) {
               ),
               example = responseMovie
             ) { (id) ->
-              respond(movieController.getMovie(id) ?: return@get)
+              val movie = movieController.getMovie(id) ?: return@get
+              val result = client.get(id).awaitSingleOrNull()
+              result?.let {
+                respond(Json.decodeFromString(it))
+                logger.trace("Data from Redis")
+              } ?: run {
+                client.set(id, Json.encodeToString(movie)).subscribe()
+                client.expire(id, 50).subscribe()
+                logger.trace("Data from MongoDB")
+                respond(movie)
+              }
             }
 
             put<StringParam, ResponseMovieDTO, RequestMovieDTO>(

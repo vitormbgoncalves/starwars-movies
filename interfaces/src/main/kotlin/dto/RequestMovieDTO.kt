@@ -20,30 +20,30 @@ import java.time.LocalDate
 @Request("Movie Request")
 data class RequestMovieDTO(
   val title: String,
-  val episode_id: Long?,
+  val episodeId: Long?,
   val storyline: String,
   val series: Series,
   val trilogy: Trilogy?,
   @JsonSerialize(using = ToStringSerializer::class)
   @JsonDeserialize(using = LocalDateDeserializer::class)
-  val release_date: LocalDate,
+  val releaseDate: LocalDate,
   val director: String,
   val screenwriters: List<String>,
   val storyBy: List<String>,
   val producers: List<String>,
-  val imdb_score: Double
+  val imdbScore: Double
 )
 
 fun RequestMovieDTO.toMovie() = Movie(
   title = title,
-  episode_id = episode_id,
+  episodeId = episodeId,
   storyline = storyline,
   series = series,
   trilogy = trilogy,
-  release_date = release_date,
+  releaseDate = releaseDate,
   director = director,
   screenwriters = screenwriters,
   storyBy = storyBy,
   producers = producers,
-  imdb_score = imdb_score
+  imdbScore = imdbScore
 )

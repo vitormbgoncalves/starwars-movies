@@ -1,5 +1,6 @@
-package com.github.vitormbgoncalves.starwarsmovies.infrastructure
+package com.github.vitormbgoncalves.starwarsmovies.infrastructure.app
 
+import cn.zenliu.ktor.redis.RedisFactory
 import com.github.vitormbgoncalves.starwarsmovies.commonlib.mapper.ObjectMapperBuilder
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.module.KoinModuleBuilder
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes.route
@@ -22,10 +23,10 @@ import io.ktor.response.respondText
 import io.ktor.routing.routing
 import io.ktor.server.netty.EngineMain
 import org.koin.ktor.ext.Koin
+import org.koin.ktor.ext.inject
 import org.koin.logger.SLF4JLogger
 import org.slf4j.event.Level
 import kotlin.reflect.KType
-import org.koin.ktor.ext.inject
 
 /**
  * Ktor main file
@@ -92,6 +93,10 @@ fun Application.moduleWithDependencies(movieController: MovieController) {
       call.respondText(e.localizedMessage, ContentType.Text.Plain)
       throw e
     }
+  }
+
+  install(RedisFactory) {
+    url = environment.config.property("redis.url").getString()
   }
 
   routing {

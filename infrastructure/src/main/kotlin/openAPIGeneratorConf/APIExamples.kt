@@ -21,16 +21,16 @@ val responseMovie: ResponseMovieDTO = ResponseMovieDTO(
   links = HalLink(mapOf("href" to "http://")),
   id = "60ac1ae25a74bf51382c469e",
   title = "A New Hope",
-  episode_id = 4,
+  episodeId = 4,
   storyline = "Princess Leia is captured and held hostage by the evil Imperial forces in their effort to take over the galactic Empire...",
   series = Series.SKYWALKER_SAGA,
   trilogy = Trilogy.ORIGINAL,
-  release_date = LocalDate.of(1977, 5, 25),
+  releaseDate = LocalDate.of(1977, 5, 25),
   director = "George Lucas",
   screenwriters = listOf("George Lucas"),
   storyBy = listOf("George Lucas"),
   producers = listOf("Gary Kurtz"),
-  imdb_score = 8.6
+  imdbScore = 8.6
 )
 
 val requestMovie: RequestMovieDTO = RequestMovieDTO(

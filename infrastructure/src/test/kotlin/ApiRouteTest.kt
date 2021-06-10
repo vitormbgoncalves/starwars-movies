@@ -2,11 +2,12 @@ package com.github.vitormbgoncalves.starwarsmovies.infrastructure.test
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.github.vitormbgoncalves.starwarsmovies.infrastructure.moduleWithDependencies
+import com.github.vitormbgoncalves.starwarsmovies.infrastructure.app.moduleWithDependencies
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes.requestMovie
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes.responseAllMovies
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes.responseMovie
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.controller.MovieController
+import io.ktor.config.MapApplicationConfig
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
@@ -22,6 +23,7 @@ import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.`should be`
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import redis.embedded.RedisServer
 
 /**
  * API routes tests
@@ -41,10 +43,26 @@ object ApiRouteTest : Spek({
 
     val movieController = mockk<MovieController>(relaxed = true)
 
+    val redis = RedisServer()
+
     beforeEachTest {
       clearMocks(movieController)
       engine.start(wait = false)
       engine.application.moduleWithDependencies(movieController)
+    }
+
+    beforeGroup {
+      redis.start()
+    }
+
+    afterGroup {
+      redis.stop()
+    }
+
+    with(engine) {
+      (environment.config as MapApplicationConfig).apply {
+        put("redis.url", "redis://127.0.0.1:6379/0?timeout=10s")
+      }
     }
 
     with(engine) {

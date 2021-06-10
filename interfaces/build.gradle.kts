@@ -6,6 +6,7 @@ val typesafe_version: String by project
 dependencies {
     // Module dependencies
     implementation(project(":core"))
+    implementation(project(":common-lib"))
 
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version")

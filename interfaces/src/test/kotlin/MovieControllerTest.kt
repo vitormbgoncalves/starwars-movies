@@ -1,8 +1,6 @@
 package com.github.vitormbgoncalves.starwarsmovies.interfaces.test
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.vitormbgoncalves.starwarsmovies.commonlib.mapper.Json
 import com.github.vitormbgoncalves.starwarsmovies.core.entities.Movie
 import com.github.vitormbgoncalves.starwarsmovies.core.entities.Series
 import com.github.vitormbgoncalves.starwarsmovies.core.entities.Trilogy
@@ -15,6 +13,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.encodeToString
 import org.amshove.kluent.coInvoking
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeInstanceOf
@@ -38,9 +37,6 @@ import java.time.Month
 
 object MovieControllerTest : Spek({
 
-  val mapper =
-    jacksonObjectMapper().registerModule(JavaTimeModule()).setSerializationInclusion(JsonInclude.Include.NON_NULL)
-
   describe("Request movies") {
 
     val mockMovieService = mockk<MovieServiceImpl>(relaxed = true)
@@ -55,7 +51,7 @@ object MovieControllerTest : Spek({
       runBlocking {
         coEvery { mockMovieService.findAll(any(), any()) } returns listOf(movie)
         val movies = movieController.getAllMovies(1, 1)
-        mapper.writeValueAsString(movies) shouldContain movieJson
+        Json.encodeToString(movies) shouldContain movieJson1
         coVerify { mockMovieService.findAll(1, 1) }
       }
     }
@@ -64,7 +60,7 @@ object MovieControllerTest : Spek({
       runBlocking {
         coEvery { mockMovieService.findById("60afdbe0b3c7c176f1f7988c") } returns movie
         val movie = movieController.getMovie("60afdbe0b3c7c176f1f7988c")
-        mapper.writeValueAsString(movie) shouldBeEqualTo movieJson
+        Json.encodeToString(movie) shouldBeEqualTo movieJson2
         coVerify { mockMovieService.findById("60afdbe0b3c7c176f1f7988c") }
       }
     }
@@ -79,7 +75,7 @@ object MovieControllerTest : Spek({
       runBlocking {
         coEvery { mockMovieService.create(any()) } returns movie
         val movie = movieController.createMovie(requestMovie)
-        mapper.writeValueAsString(movie) shouldBeEqualTo movieJson
+        Json.encodeToString(movie) shouldBeEqualTo movieJson2
         coVerify { mockMovieService.create(any()) }
       }
     }
@@ -87,7 +83,7 @@ object MovieControllerTest : Spek({
       runBlocking {
         coEvery { mockMovieService.update(any(), any()) } returns movie
         val movie = movieController.updateMovie("60afdbe0b3c7c176f1f7988c", requestMovie)
-        mapper.writeValueAsString(movie) shouldBeEqualTo movieJson
+        Json.encodeToString(movie) shouldBeEqualTo movieJson2
         coVerify { mockMovieService.update(any(), any()) }
       }
     }
@@ -113,7 +109,7 @@ object MovieControllerTest : Spek({
           "/ by zero"
         val movies = movieController.getMoviesPage(1, 1)
         movies shouldBeInstanceOf ResponseAllMovies::class
-        mapper.writeValueAsString(movies) shouldBeEqualTo allMoviesJson
+        Json.encodeToString(movies) shouldBeEqualTo allMoviesJson
         coVerify { mockMovieService.findAll(0, 1) }
         coVerify { mockMovieService.totalMovies() }
       }
@@ -152,45 +148,66 @@ private val requestMovie = RequestMovieDTO(
   8.6
 )
 
-private const val movieJson =
-  "{\"_links\":{\"self\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies/60ac1ae25a74bf51382c469e\"}}," +
+private const val movieJson1 =
+  "[{\"_links\":{" +
+    "\"self\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies/60ac1ae25a74bf51382c469e\"}}," +
     "\"id\":\"60ac1ae25a74bf51382c469e\"," +
     "\"title\":\"A New Hope\"," +
-    "\"episode_id\":4," +
+    "\"episodeId\":4," +
     "\"storyline\":\"Princess Leia is captured...\"," +
     "\"series\":\"SKYWALKER_SAGA\"," +
     "\"trilogy\":\"ORIGINAL\"," +
-    "\"release_date\":\"1977-05-25\"," +
+    "\"releaseDate\":\"1977-05-25\"," +
     "\"director\":\"George Lucas\"," +
     "\"screenwriters\":[\"George Lucas\"]," +
     "\"storyBy\":[\"George Lucas\"]," +
     "\"producers\":[\"Gary Kurtz\"]," +
-    "\"imdb_score\":8.6," +
-    "\"created\":[2021,6,2,6,30,40,50000]," +
-    "\"edited\":[2021,6,2,6,30,40,50000]}"
+    "\"imdbScore\":8.6," +
+    "\"created\":\"2021/06/02 06:30:40\"," +
+    "\"edited\":\"2021/06/02 06:30:40\"}]"
+
+private const val movieJson2 =
+  "{\"_links\":{" +
+    "\"self\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies/60ac1ae25a74bf51382c469e\"}}," +
+    "\"id\":\"60ac1ae25a74bf51382c469e\"," +
+    "\"title\":\"A New Hope\"," +
+    "\"episodeId\":4," +
+    "\"storyline\":\"Princess Leia is captured...\"," +
+    "\"series\":\"SKYWALKER_SAGA\"," +
+    "\"trilogy\":\"ORIGINAL\"," +
+    "\"releaseDate\":\"1977-05-25\"," +
+    "\"director\":\"George Lucas\"," +
+    "\"screenwriters\":[\"George Lucas\"]," +
+    "\"storyBy\":[\"George Lucas\"]," +
+    "\"producers\":[\"Gary Kurtz\"]," +
+    "\"imdbScore\":8.6," +
+    "\"created\":\"2021/06/02 06:30:40\"," +
+    "\"edited\":\"2021/06/02 06:30:40\"}"
 
 private const val allMoviesJson =
-  "{\"_links\":{\"self\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies?page=1&size=1\"}," +
+  "{\"_links\":{" +
+    "\"self\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies?page=1&size=1\"}," +
     "\"first\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies/?page=1&size=1\"}," +
-    "\"prev\":{}," +
-    "\"next\":{}," +
+    "\"prev\":{\"href\":null}," +
+    "\"next\":{\"href\":null}," +
     "\"last\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies?page=1&size=1\"}," +
-    "\"curries\":{\"name\":\"ns\",\"href\":\"http://127.0.0.1:8080/star-wars\"," +
-    "\"templated\":\"true\"}}," +
-    "\"_embedded\":{\"ns:movies\":[{" +
-    "\"_links\":{\"self\":{\"href\":\"/movies/60ac1ae25a74bf51382c469e\"}}," +
+    "\"curries\":{\"name\":\"ns\",\"href\":\"http://127.0.0.1:8080/star-wars\"}}," +
+    "\"_embedded\":{" +
+    "\"ns:movies\":[{" +
+    "\"_links\":{" +
+    "\"self\":{\"href\":\"/movies/60ac1ae25a74bf51382c469e\"}}," +
     "\"id\":\"60ac1ae25a74bf51382c469e\"," +
     "\"title\":\"A New Hope\"," +
-    "\"episode_id\":4," +
+    "\"episodeId\":4," +
     "\"storyline\":\"Princess Leia is captured...\"," +
     "\"series\":\"SKYWALKER_SAGA\"," +
     "\"trilogy\":\"ORIGINAL\"," +
-    "\"release_date\":\"1977-05-25\"," +
+    "\"releaseDate\":\"1977-05-25\"," +
     "\"director\":\"George Lucas\"," +
     "\"screenwriters\":[\"George Lucas\"]," +
     "\"storyBy\":[\"George Lucas\"]," +
     "\"producers\":[\"Gary Kurtz\"]," +
-    "\"imdb_score\":8.6," +
-    "\"created\":[2021,6,2,6,30,40,50000]," +
-    "\"edited\":[2021,6,2,6,30,40,50000]}]}," +
+    "\"imdbScore\":8.6," +
+    "\"created\":\"2021/06/02 06:30:40\"," +
+    "\"edited\":\"2021/06/02 06:30:40\"}]}," +
     "\"info\":{\"count\":1,\"pages\":1}}"

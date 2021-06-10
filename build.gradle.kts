@@ -9,6 +9,7 @@ val kotlinLanguage_version: String by project
 val spek_version: String by project
 val kluent_version: String by project
 val mockk_version: String by project
+val serialization_version: String by project
 
 val jacocoExcludes = listOf(
     "**/core/**",
@@ -42,6 +43,7 @@ allprojects {
     }
 
     apply(plugin = "kotlin")
+    apply(plugin = "kotlinx-serialization")
     apply(plugin = "jacoco")
 
     jacoco {
@@ -94,7 +96,9 @@ subprojects {
             // Kotlin
             implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version")
             implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization_version")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_version")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlin_version")
 
             // Test
             testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spek_version")

@@ -4,6 +4,9 @@ val ktor_version: String by project
 val kmongo_version: String by project
 val ktorOpenAPIGenerator: String by project
 val jackson_version: String by project
+val ktorRedis_version: String by project
+val lettuce_version: String by project
+val embeddedRedis_version: String by project
 
 dependencies {
     // Module dependencies
@@ -31,6 +34,11 @@ dependencies {
 
     // KMongo
     implementation("org.litote.kmongo:kmongo-coroutine-serialization:$kmongo_version")
+
+    // Redis ktor client based on lettuce
+    implementation("com.github.ZenLiuCN:ktor_redis:$ktorRedis_version")
+    implementation("io.lettuce:lettuce-core:$lettuce_version")
+    testImplementation("com.github.codemonstur:embedded-redis:$embeddedRedis_version")
 
     // Ktor OpenAPI Generator
     implementation("com.github.papsign:Ktor-OpenAPI-Generator:$ktorOpenAPIGenerator")

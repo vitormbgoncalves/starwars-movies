@@ -53,6 +53,6 @@ object ObjectMapperBuilder {
     registerModule(KotlinModule())
     registerModule(JavaTimeModule())
 
-    dateFormat = SimpleDateFormat("dd-MM-yyyy")
+    dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
   }
 }

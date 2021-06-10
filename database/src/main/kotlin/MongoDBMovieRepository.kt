@@ -28,61 +28,53 @@ class MongoDBMovieRepository(client: CoroutineClient) : IMovieRepository {
   }
 
   override suspend fun findAll(page: Int, size: Int): List<Movie> {
-    return try {
-      val skips = page * size
-      moviesCollection.find().skip(skips).limit(size).toList().asIterable().map { it }
-    } catch (e: Exception) {
-      throw IllegalArgumentException(e.localizedMessage)
-    }
+    val skips = page * size
+    return moviesCollection.find().skip(skips).limit(size).toList().asIterable().map { it }
   }
 
-  override suspend fun findById(id: String): Movie? {
-    return try {
-      moviesCollection.findOneById(ObjectId(id))
-    } catch (e: Exception) {
-      throw IllegalArgumentException(e.localizedMessage)
-    }
+  override suspend fun findById(id: String): Movie {
+    return moviesCollection.findOneById(ObjectId(id))
+      ?: throw IllegalArgumentException("movie with the given id not found!")
   }
 
   override suspend fun create(movie: Movie): Movie {
-    return try {
+    try {
       moviesCollection.insertOne(movie)
-      movie
+      return movie
     } catch (e: Exception) {
       throw IllegalArgumentException(e.localizedMessage)
     }
   }
 
-  override suspend fun update(id: String, movie: Movie): Movie? {
-    return try {
+  override suspend fun update(id: String, movie: Movie): Movie {
+    try {
       moviesCollection.updateOne(
         Movie::id eq ObjectId(id).toId(),
         set(
           Movie::title setTo movie.title,
-          Movie::episode_id setTo movie.episode_id,
+          Movie::episodeId setTo movie.episodeId,
           Movie::storyline setTo movie.storyline,
           Movie::series setTo movie.series,
           Movie::trilogy setTo movie.trilogy,
-          Movie::release_date setTo movie.release_date,
+          Movie::releaseDate setTo movie.releaseDate,
           Movie::director setTo movie.director,
           Movie::screenwriters setTo movie.screenwriters,
           Movie::storyBy setTo movie.storyBy,
           Movie::producers setTo movie.producers,
-          Movie::imdb_score setTo movie.imdb_score,
+          Movie::imdbScore setTo movie.imdbScore,
           Movie::edited setTo LocalDateTime.now()
         )
       )
-      moviesCollection.findOneById(ObjectId(id))
+      return moviesCollection.findOneById(ObjectId(id))
+        ?: throw IllegalArgumentException("movie with the given id not found!")
     } catch (e: Exception) {
       throw IllegalArgumentException(e.localizedMessage)
     }
   }
 
   override suspend fun delete(id: String) {
-    try {
-      moviesCollection.deleteOneById(ObjectId(id))
-    } catch (e: Exception) {
-      throw IllegalArgumentException(e.localizedMessage)
+    when (moviesCollection.deleteOneById(ObjectId(id)).deletedCount) {
+      0L -> throw IllegalArgumentException("movie with the given id not found!")
     }
   }
 

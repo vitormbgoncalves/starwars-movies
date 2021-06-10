@@ -16,7 +16,6 @@ import kotlinx.coroutines.runBlocking
 import org.amshove.kluent.coInvoking
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeInstanceOf
-import org.amshove.kluent.shouldBeNull
 import org.amshove.kluent.shouldContain
 import org.amshove.kluent.shouldThrow
 import org.amshove.kluent.withMessage
@@ -84,11 +83,10 @@ object IntegrationTestWithMongoDB : Spek({
 
     it("do not find movie with incorrect id") {
       runBlocking {
-        movieRepository.findById("60bba776d0686920739c3cf9").shouldBeNull()
         coInvoking {
-          movieRepository.findById("60bba776d0686920739c3cf")
+          movieRepository.findById("60bba776d0686920739c3cf9")
         } shouldThrow IllegalArgumentException::class withMessage
-          "invalid hexadecimal representation of an ObjectId: [60bba776d0686920739c3cf]"
+          "movie with the given id not found!"
       }
     }
 
@@ -106,14 +104,13 @@ object IntegrationTestWithMongoDB : Spek({
 
     it("do not update movie with incorrect id") {
       runBlocking {
-        movieRepository.update("60bba776d0686920739c3cf9", movie2).shouldBeNull()
         coInvoking {
           movieRepository.update(
-            "60bba776d0686920739c3cf",
+            "60bba776d0686920739c3cf6",
             movie2
           )
         } shouldThrow IllegalArgumentException::class withMessage
-          "invalid hexadecimal representation of an ObjectId: [60bba776d0686920739c3cf]"
+          "movie with the given id not found!"
       }
     }
 
@@ -126,16 +123,24 @@ object IntegrationTestWithMongoDB : Spek({
     it("delete movie") {
       runBlocking {
         movieRepository.delete("60bba776d0686920739c3cf5")
-        movieRepository.findById("60bba776d0686920739c3cf5").shouldBeNull()
+      }
+    }
+
+    it("do not delete movie with invalid id") {
+      runBlocking {
+        coInvoking {
+          movieRepository.delete("60bba776d0686920739c3cf")
+        } shouldThrow IllegalArgumentException::class withMessage
+          "invalid hexadecimal representation of an ObjectId: [60bba776d0686920739c3cf]"
       }
     }
 
     it("do not delete movie with incorrect id") {
       runBlocking {
         coInvoking {
-          movieRepository.delete("60bba776d0686920739c3cf")
+          movieRepository.delete("60bba776d0686920739c3cf5")
         } shouldThrow IllegalArgumentException::class withMessage
-          "invalid hexadecimal representation of an ObjectId: [60bba776d0686920739c3cf]"
+          "movie with the given id not found!"
       }
     }
   }

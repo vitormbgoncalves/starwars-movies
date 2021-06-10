@@ -61,6 +61,8 @@ task<JacocoReport>("jacocoFullReport") {
 val jacocoExcludes = listOf(
     "**/core/**",
     "**/commonlib/**",
+    "**/dto/**",
+    "**/app/**",
     "**/openAPIGeneratorConfig/**",
     "**/module"
 )
