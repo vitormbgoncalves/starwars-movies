@@ -3,9 +3,9 @@ package com.github.vitormbgoncalves.starwarsmovies.infrastructure.test
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.app.moduleWithDependencies
-import com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes.requestMovie
-import com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes.responseAllMovies
-import com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes.responseMovie
+import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.requestMovie
+import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.responseAllMovies
+import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.responseMovie
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.controller.MovieController
 import io.ktor.config.MapApplicationConfig
 import io.ktor.http.ContentType

@@ -7,6 +7,7 @@ val jackson_version: String by project
 val ktorRedis_version: String by project
 val lettuce_version: String by project
 val embeddedRedis_version: String by project
+val healthCheck_version: String by project
 
 dependencies {
     // Module dependencies
@@ -23,7 +24,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
 
-    // Jackson Serialization
+    // Jackson
     implementation("io.ktor:ktor-jackson:$ktor_version")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson_version")
 
@@ -35,11 +36,14 @@ dependencies {
     // KMongo
     implementation("org.litote.kmongo:kmongo-coroutine-serialization:$kmongo_version")
 
-    // Redis ktor client based on lettuce
+    // Redis
     implementation("com.github.ZenLiuCN:ktor_redis:$ktorRedis_version")
     implementation("io.lettuce:lettuce-core:$lettuce_version")
     testImplementation("com.github.codemonstur:embedded-redis:$embeddedRedis_version")
 
     // Ktor OpenAPI Generator
     implementation("com.github.papsign:Ktor-OpenAPI-Generator:$ktorOpenAPIGenerator")
+
+    // Ktor health-check
+    implementation("com.github.zensum:ktor-health-check:$healthCheck_version")
 }

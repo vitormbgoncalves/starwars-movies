@@ -2,12 +2,14 @@ package com.github.vitormbgoncalves.starwarsmovies.infrastructure.app
 
 import cn.zenliu.ktor.redis.RedisFactory
 import com.github.vitormbgoncalves.starwarsmovies.commonlib.mapper.ObjectMapperBuilder
+import com.github.vitormbgoncalves.starwarsmovies.infrastructure.health.MongoHealthCheck
+import com.github.vitormbgoncalves.starwarsmovies.infrastructure.health.RedisHealthCheck
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.module.KoinModuleBuilder
+import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.installAuth
+import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.installOpenApi
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes.route
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.controller.MovieController
-import com.papsign.ktor.openapigen.OpenAPIGen
-import com.papsign.ktor.openapigen.schema.namer.DefaultSchemaNamer
-import com.papsign.ktor.openapigen.schema.namer.SchemaNamer
+import com.typesafe.config.ConfigFactory
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -22,11 +24,11 @@ import io.ktor.request.path
 import io.ktor.response.respondText
 import io.ktor.routing.routing
 import io.ktor.server.netty.EngineMain
+import ktor_health_check.Health
 import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.inject
 import org.koin.logger.SLF4JLogger
 import org.slf4j.event.Level
-import kotlin.reflect.KType
 
 /**
  * Ktor main file
@@ -54,26 +56,9 @@ fun Application.main() {
 
 fun Application.moduleWithDependencies(movieController: MovieController) {
 
-  install(OpenAPIGen) {
-    info {
-      version = "1.0-SNAPSHOT"
-      title = "Star Wars Movies Catalog"
-      description = "Full list of Star Wars films"
-      contact {
-        name = "Vitor Goncalves"
-        url = "https://vitorgoncalves.me"
-      }
-    }
-    replaceModule(
-      DefaultSchemaNamer,
-      object : SchemaNamer {
-        val regex = Regex("[A-Za-z0-9_.]+")
-        override fun get(type: KType): String {
-          return type.toString().replace(regex) { it.value.split(".").last() }.replace(Regex(">|<|, "), "_")
-        }
-      }
-    )
-  }
+  installAuth()
+
+  installOpenApi()
 
   install(ContentNegotiation) {
     jackson {
@@ -96,7 +81,12 @@ fun Application.moduleWithDependencies(movieController: MovieController) {
   }
 
   install(RedisFactory) {
-    url = environment.config.property("redis.url").getString()
+    url = ConfigFactory.load("redis.conf").getString("REDIS_URL")
+  }
+
+  install(Health) {
+    readyCheck("MongoDB") { MongoHealthCheck.check() }
+    readyCheck("Redis") { RedisHealthCheck.check() }
   }
 
   routing {

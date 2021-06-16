@@ -1,4 +1,4 @@
-package com.github.vitormbgoncalves.starwarsmovies.infrastructure.openAPIGeneratorConfig
+package com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas
 
 import com.papsign.ktor.openapigen.APITag
 import com.papsign.ktor.openapigen.annotations.Path
