@@ -10,7 +10,9 @@ import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.ResponseMovieDT
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.toMovie
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.toResponseAllMovies
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.toResponseMovieDTO
+import com.papsign.ktor.openapigen.model.schema.DataFormat
 import com.typesafe.config.ConfigFactory
+import kotlin.math.ceil
 
 /**
  * Controller for movies
@@ -44,11 +46,10 @@ class MovieController(private val movieService: IMovieService) {
     return try {
       val movies = movieService.findAll(page - 1, size).map { it.toResponseAllMovies() }
       val totalMovies = movieService.totalMovies()
-      val paginating = (totalMovies / size)
+      val paginating = ((totalMovies + size - 1) / size)
       val totalPages = if (totalMovies == 1L && size == 1 || paginating <= 1) 1 else paginating
       val next = if (page < totalPages.toInt()) page + 1 else null
       val prev = if (page > 1) page - 1 else null
-      val info = PagingInfo(totalMovies.toInt(), totalPages.toInt())
       val uri = ConfigFactory.load("application.conf").getString("hypermedia.uri")
       val uriSelf = "$uri/movies?page=$page&size=$size"
       val uriFirst = "$uri/movies/?page=1&size=$size"
@@ -64,6 +65,7 @@ class MovieController(private val movieService: IMovieService) {
         Curries("ns", uri)
       )
       val embedded = mapOf("ns:movies" to movies)
+      val info = PagingInfo(totalMovies.toInt(), totalPages.toInt())
       ResponseAllMovies(links, embedded, info)
     } catch (e: Exception) {
       throw IllegalArgumentException(e.localizedMessage)

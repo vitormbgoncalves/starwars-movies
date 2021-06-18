@@ -2,11 +2,10 @@ package com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes
 
 import cn.zenliu.ktor.redis.RedisFactory
 import com.github.vitormbgoncalves.starwarsmovies.commonlib.mapper.Json
-import com.github.vitormbgoncalves.starwarsmovies.commonlib.mapper.ObjectMapperBuilder
+import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.OAuth
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.PageQuery
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.StringParam
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.Tag
-import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.jwtAuth
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.requestMovie
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.responseAllMovies
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.responseMovie
@@ -28,7 +27,7 @@ import com.papsign.ktor.openapigen.route.tag
 import com.papsign.ktor.openapigen.route.throws
 import io.ktor.application.application
 import io.ktor.application.call
-import io.ktor.auth.jwt.JWTPrincipal
+import io.ktor.auth.OAuthAccessTokenResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.response.respondRedirect
@@ -76,7 +75,7 @@ fun Routing.route(movieController: MovieController) {
 
   apiRouting {
 
-    jwtAuth {
+    OAuth {
 
       route("star-wars/movies") {
 
@@ -88,7 +87,7 @@ fun Routing.route(movieController: MovieController) {
           ) {
 
             status(200) {
-              get<PageQuery, ResponseAllMovies, JWTPrincipal>(
+              get<PageQuery, ResponseAllMovies, OAuthAccessTokenResponse>(
                 info(
                   summary = "Find all movies.",
                   description = "Find all movies with pagination."
@@ -109,7 +108,7 @@ fun Routing.route(movieController: MovieController) {
                 }
               }
 
-              get<StringParam, ResponseMovieDTO, JWTPrincipal>(
+              get<StringParam, ResponseMovieDTO, OAuthAccessTokenResponse>(
                 info(
                   summary = "Find movie.",
                   description = "Find movie by id."
@@ -129,7 +128,7 @@ fun Routing.route(movieController: MovieController) {
                 }
               }
 
-              put<StringParam, ResponseMovieDTO, RequestMovieDTO, JWTPrincipal>(
+              put<StringParam, ResponseMovieDTO, RequestMovieDTO, OAuthAccessTokenResponse>(
                 info(
                   summary = "Update movie.",
                   description = "Update movie by id."
@@ -142,7 +141,7 @@ fun Routing.route(movieController: MovieController) {
             }
 
             status(201) {
-              post<Unit, ResponseMovieDTO, RequestMovieDTO, JWTPrincipal>(
+              post<Unit, ResponseMovieDTO, RequestMovieDTO, OAuthAccessTokenResponse>(
                 info(
                   summary = "Register movie.",
                   description = "Register new movie."
@@ -155,7 +154,7 @@ fun Routing.route(movieController: MovieController) {
             }
 
             status(204) {
-              delete<StringParam, Unit, JWTPrincipal>(
+              delete<StringParam, Unit, OAuthAccessTokenResponse>(
                 info(
                   summary = "Delete movie.",
                   description = "Delete movie by id."

@@ -16,13 +16,18 @@ dependencies {
     implementation(project(":database"))
     implementation(project(":common-lib"))
 
-    // Ktor
+    // Ktor Server
     implementation("io.ktor:ktor-server-netty:$ktor_version")
     implementation("io.ktor:ktor-server-core:$ktor_version")
     implementation("io.ktor:ktor-auth:$ktor_version")
     implementation("io.ktor:ktor-auth-jwt:$ktor_version")
+    implementation("io.ktor:ktor-auth:$ktor_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
+
+    // Ktor Client
+    implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-apache:$ktor_version")
 
     // Jackson
     implementation("io.ktor:ktor-jackson:$ktor_version")
