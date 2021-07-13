@@ -8,6 +8,7 @@ val ktorRedis_version: String by project
 val lettuce_version: String by project
 val embeddedRedis_version: String by project
 val healthCheck_version: String by project
+val prometeus_version: String by project
 
 dependencies {
     // Module dependencies
@@ -51,4 +52,8 @@ dependencies {
 
     // Ktor health-check
     implementation("com.github.zensum:ktor-health-check:$healthCheck_version")
+
+    // Micrometer
+    implementation("io.ktor:ktor-metrics-micrometer:$ktor_version")
+    implementation("io.micrometer:micrometer-registry-prometheus:$prometeus_version")
 }

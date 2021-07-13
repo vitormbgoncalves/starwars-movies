@@ -20,10 +20,15 @@ import io.ktor.features.DefaultHeaders
 import io.ktor.features.StatusPages
 import io.ktor.http.ContentType
 import io.ktor.jackson.jackson
+import io.ktor.metrics.micrometer.MicrometerMetrics
 import io.ktor.request.path
+import io.ktor.response.respond
 import io.ktor.response.respondText
+import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.server.netty.EngineMain
+import io.micrometer.prometheus.PrometheusConfig
+import io.micrometer.prometheus.PrometheusMeterRegistry
 import ktor_health_check.Health
 import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.inject
@@ -55,6 +60,12 @@ fun Application.main() {
 }
 
 fun Application.moduleWithDependencies(movieController: MovieController) {
+
+  val appMicrometerRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+
+  install(MicrometerMetrics) {
+    registry = appMicrometerRegistry
+  }
 
   installAuth()
 
@@ -90,7 +101,15 @@ fun Application.moduleWithDependencies(movieController: MovieController) {
   }
 
   routing {
+
     trace { application.log.trace(it.buildText()) }
+
     route(movieController)
+
+    get("/metrics") {
+      call.respond(appMicrometerRegistry.scrape())
+    }
+
+
   }
 }
