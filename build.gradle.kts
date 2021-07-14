@@ -99,6 +99,7 @@ subprojects {
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization_version")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_version")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlin_version")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$kotlin_version")
 
             // Test
             testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spek_version")

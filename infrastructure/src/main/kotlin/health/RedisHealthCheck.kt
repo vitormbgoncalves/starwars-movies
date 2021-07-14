@@ -4,8 +4,8 @@ import cn.zenliu.ktor.redis.RedisFactory
 import io.lettuce.core.codec.StringCodec
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.withTimeoutOrNull
+import mu.KotlinLogging
 import org.koin.core.component.KoinComponent
-import org.slf4j.LoggerFactory
 
 /**
  * Redis health check
@@ -18,7 +18,7 @@ object RedisHealthCheck : KoinComponent {
 
   private val client = RedisFactory.newReactiveClient(StringCodec.UTF8)
 
-  private val logger = LoggerFactory.getLogger(RedisHealthCheck::class.java)
+  private val logger = KotlinLogging.logger {}
 
   suspend fun check(): Boolean {
     return try {

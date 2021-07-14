@@ -4,7 +4,10 @@ import com.github.vitormbgoncalves.starwarsmovies.core.usecases.repository.IMovi
 import com.github.vitormbgoncalves.starwarsmovies.core.usecases.service.IMovieService
 import com.github.vitormbgoncalves.starwarsmovies.core.usecases.service.MovieServiceImpl
 import com.github.vitormbgoncalves.starwarsmovies.database.MongoDBMovieRepository
+import com.github.vitormbgoncalves.starwarsmovies.infrastructure.tracing.OpenTracing
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.controller.MovieController
+import com.mongodb.ConnectionString
+import com.mongodb.MongoClientSettings
 import com.typesafe.config.ConfigFactory
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -30,8 +33,13 @@ val KoinModuleBuilder: Module = module(createdAtStart = true) {
 
   // MongoDB Client
   single {
-    KMongo.createClient(
-      ConfigFactory.load("mongodb.conf").getString("MONGO_URI")
-    ).coroutine
+    KMongo.createClient(settings).coroutine
   }
 }
+
+// MongoDB Config
+private val settings = MongoClientSettings
+  .builder()
+  .addCommandListener(OpenTracing.listener())
+  .applyConnectionString(ConnectionString(ConfigFactory.load("mongodb.conf").getString("MONGO_URI")))
+  .build()

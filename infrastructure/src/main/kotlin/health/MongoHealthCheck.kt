@@ -2,10 +2,10 @@ package com.github.vitormbgoncalves.starwarsmovies.infrastructure.health
 
 import com.mongodb.BasicDBObject
 import kotlinx.coroutines.withTimeoutOrNull
+import mu.KotlinLogging
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.litote.kmongo.coroutine.CoroutineClient
-import org.slf4j.LoggerFactory
 
 /**
  * MongoDB health check
@@ -18,7 +18,7 @@ object MongoHealthCheck : KoinComponent {
 
   private val client: CoroutineClient by inject()
 
-  private val logger = LoggerFactory.getLogger(MongoHealthCheck::class.java)
+  private val logger = KotlinLogging.logger {}
 
   suspend fun check(): Boolean {
     return try {

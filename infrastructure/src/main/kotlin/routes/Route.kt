@@ -1,6 +1,7 @@
 package com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes
 
 import cn.zenliu.ktor.redis.RedisFactory
+import com.github.fstien.kotlin.logging.opentracing.decorator.withOpenTracingLogs
 import com.github.vitormbgoncalves.starwarsmovies.commonlib.mapper.Json
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.OAuth
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.PageQuery
@@ -9,6 +10,7 @@ import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.Tag
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.requestMovie
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.responseAllMovies
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.responseMovie
+import com.github.vitormbgoncalves.starwarsmovies.infrastructure.tracing.OpenTracing
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.controller.MovieController
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.RequestMovieDTO
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.ResponseAllMovies
@@ -33,11 +35,14 @@ import io.ktor.response.respond
 import io.ktor.response.respondRedirect
 import io.ktor.routing.Routing
 import io.ktor.routing.get
+import io.lettuce.core.api.StatefulRedisConnection
+import io.lettuce.core.api.async.RedisAsyncCommands
 import io.lettuce.core.codec.StringCodec
-import kotlinx.coroutines.reactor.awaitSingleOrNull
+import io.opentracing.contrib.redis.lettuce52.TracingStatefulRedisConnection
+import kotlinx.coroutines.future.await
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import org.slf4j.LoggerFactory
+import mu.KotlinLogging
 
 /**
  * Ktor routing controller
@@ -49,9 +54,14 @@ import org.slf4j.LoggerFactory
 @OptIn(ExperimentalStdlibApi::class)
 fun Routing.route(movieController: MovieController) {
 
-  val client = RedisFactory.newReactiveClient(StringCodec.UTF8)
+  val client = RedisFactory.newAsyncClient(StringCodec.UTF8)
 
-  val logger = LoggerFactory.getLogger("OpenAPI Route")
+  val connection: StatefulRedisConnection<String, String> =
+    TracingStatefulRedisConnection(client.statefulConnection, OpenTracing.tracingConfiguration)
+
+  val commands: RedisAsyncCommands<String, String> = connection.async()
+
+  val logger = KotlinLogging.logger {}.withOpenTracingLogs()
 
   get("/openapi.json") {
 
@@ -94,15 +104,14 @@ fun Routing.route(movieController: MovieController) {
                 ),
                 example = responseAllMovies
               ) { (page, size) ->
-                val movies = movieController.getMoviesPage(page, size)
-                val result = client.get("page=$page&size=$size").awaitSingleOrNull()
-
+                val result = commands.get("page=$page&size=$size").await()
                 result?.let {
                   respond(Json.decodeFromString(it))
                   logger.trace("Data from Redis")
                 } ?: run {
-                  client.set("page=$page&size=$size", Json.encodeToString(movies)).subscribe()
-                  client.expire("page=$page&size=$size", 20).subscribe()
+                  val movies = movieController.getMoviesPage(page, size)
+                  commands.set("page=$page&size=$size", Json.encodeToString(movies))
+                  commands.expire("page=$page&size=$size", 20)
                   logger.trace("Data from MongoDB")
                   respond(movies)
                 }
@@ -115,14 +124,14 @@ fun Routing.route(movieController: MovieController) {
                 ),
                 example = responseMovie
               ) { (id) ->
-                val movie = movieController.getMovie(id) ?: return@get
-                val result = client.get(id).awaitSingleOrNull()
+                val result = commands.get(id).await()
                 result?.let {
                   respond(Json.decodeFromString(it))
                   logger.trace("Data from Redis")
                 } ?: run {
-                  client.set(id, Json.encodeToString(movie)).subscribe()
-                  client.expire(id, 50).subscribe()
+                  val movie = movieController.getMovie(id) ?: return@get
+                  commands.set(id, Json.encodeToString(movie))
+                  commands.expire(id, 50)
                   logger.trace("Data from MongoDB")
                   respond(movie)
                 }

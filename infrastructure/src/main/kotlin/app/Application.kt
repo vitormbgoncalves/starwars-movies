@@ -8,6 +8,7 @@ import com.github.vitormbgoncalves.starwarsmovies.infrastructure.module.KoinModu
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.installAuth
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.installOpenApi
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes.route
+import com.github.vitormbgoncalves.starwarsmovies.infrastructure.tracing.OpenTracing.installOpenTracing
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.controller.MovieController
 import com.typesafe.config.ConfigFactory
 import io.ktor.application.Application
@@ -67,6 +68,12 @@ fun Application.moduleWithDependencies(movieController: MovieController) {
     registry = appMicrometerRegistry
   }
 
+  install(RedisFactory) {
+    url = ConfigFactory.load("redis.conf").getString("REDIS_URL")
+  }
+
+  installOpenTracing()
+
   installAuth()
 
   installOpenApi()
@@ -91,10 +98,6 @@ fun Application.moduleWithDependencies(movieController: MovieController) {
     }
   }
 
-  install(RedisFactory) {
-    url = ConfigFactory.load("redis.conf").getString("REDIS_URL")
-  }
-
   install(Health) {
     readyCheck("MongoDB") { MongoHealthCheck.check() }
     readyCheck("Redis") { RedisHealthCheck.check() }
@@ -109,7 +112,5 @@ fun Application.moduleWithDependencies(movieController: MovieController) {
     get("/metrics") {
       call.respond(appMicrometerRegistry.scrape())
     }
-
-
   }
 }

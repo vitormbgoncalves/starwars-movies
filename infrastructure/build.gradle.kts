@@ -2,13 +2,19 @@ val koin_version: String by project
 val logback_version: String by project
 val ktor_version: String by project
 val kmongo_version: String by project
-val ktorOpenAPIGenerator: String by project
+val ktorOpenAPIGenerator_version: String by project
 val jackson_version: String by project
 val ktorRedis_version: String by project
 val lettuce_version: String by project
 val embeddedRedis_version: String by project
 val healthCheck_version: String by project
 val prometeus_version: String by project
+val ktorOpentracing_version: String by project
+val jaegerClient_version: String by project
+val opentracingMongoDB_version: String by project
+val kotlinLogging_version: String by project
+val opentracingDecorator_version: String by project
+val opentracingLettuce_version: String by project
 
 dependencies {
     // Module dependencies
@@ -28,7 +34,9 @@ dependencies {
 
     // Ktor Client
     implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-client-apache:$ktor_version")
+    implementation("io.ktor:ktor-client-jackson:$ktor_version")
 
     // Jackson
     implementation("io.ktor:ktor-jackson:$ktor_version")
@@ -48,7 +56,7 @@ dependencies {
     testImplementation("com.github.codemonstur:embedded-redis:$embeddedRedis_version")
 
     // Ktor OpenAPI Generator
-    implementation("com.github.papsign:Ktor-OpenAPI-Generator:$ktorOpenAPIGenerator")
+    implementation("com.github.papsign:Ktor-OpenAPI-Generator:$ktorOpenAPIGenerator_version")
 
     // Ktor health-check
     implementation("com.github.zensum:ktor-health-check:$healthCheck_version")
@@ -56,4 +64,14 @@ dependencies {
     // Micrometer
     implementation("io.ktor:ktor-metrics-micrometer:$ktor_version")
     implementation("io.micrometer:micrometer-registry-prometheus:$prometeus_version")
+
+    // OpenTracing
+    implementation("io.jaegertracing:jaeger-client:$jaegerClient_version")
+    implementation("com.zopa:ktor-opentracing:$ktorOpentracing_version")
+    implementation("io.opentracing.contrib:opentracing-mongo-common:$opentracingMongoDB_version")
+    implementation("io.opentracing.contrib:opentracing-redis-lettuce-5.2:$opentracingLettuce_version")
+
+    // Kotlin Logging
+    implementation("io.github.microutils:kotlin-logging-jvm:$kotlinLogging_version")
+    implementation("com.github.fstien:kotlin-logging-opentracing-decorator:$opentracingDecorator_version")
 }
