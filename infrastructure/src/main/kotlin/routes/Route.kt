@@ -27,14 +27,20 @@ import com.papsign.ktor.openapigen.route.route
 import com.papsign.ktor.openapigen.route.status
 import com.papsign.ktor.openapigen.route.tag
 import com.papsign.ktor.openapigen.route.throws
+import com.zopa.ktor.opentracing.span
 import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.auth.OAuthAccessTokenResponse
+import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.request.uri
 import io.ktor.response.respond
 import io.ktor.response.respondRedirect
 import io.ktor.routing.Routing
+import io.ktor.routing.application
 import io.ktor.routing.get
+import io.ktor.routing.route
+import io.ktor.routing.routing
 import io.lettuce.core.api.StatefulRedisConnection
 import io.lettuce.core.api.async.RedisAsyncCommands
 import io.lettuce.core.codec.StringCodec
@@ -43,6 +49,8 @@ import kotlinx.coroutines.future.await
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import mu.KotlinLogging
+import org.litote.kmongo.MongoOperator
+import org.litote.kmongo.json
 
 /**
  * Ktor routing controller
@@ -78,6 +86,7 @@ fun Routing.route(movieController: MovieController) {
     )*/
 
     call.respond(application.openAPIGen.api.serialize())
+
   }
   get("/") {
     call.respondRedirect("/swagger-ui/index.html?url=/openapi.json", true)
@@ -104,16 +113,22 @@ fun Routing.route(movieController: MovieController) {
                 ),
                 example = responseAllMovies
               ) { (page, size) ->
-                val result = commands.get("page=$page&size=$size").await()
-                result?.let {
-                  respond(Json.decodeFromString(it))
-                  logger.trace("Data from Redis")
-                } ?: run {
-                  val movies = movieController.getMoviesPage(page, size)
-                  commands.set("page=$page&size=$size", Json.encodeToString(movies))
-                  commands.expire("page=$page&size=$size", 20)
-                  logger.trace("Data from MongoDB")
-                  respond(movies)
+                span("getMovies") {
+                  val result = commands.get("page=$page&size=$size").await()
+                  result?.let {
+                    respond(Json.decodeFromString(it))
+                    setTag("route", route.ktorRoute.toString())
+                    setTag("response", it)
+                    logger.trace("Data from Redis")
+                  } ?: run {
+                    val movies = movieController.getMoviesPage(page, size)
+                    respond(movies)
+                    val moviesJson = Json.encodeToString(movies)
+                    commands.setex("page=$page&size=$size", 20, moviesJson)
+                    logger.trace("Data from MongoDB")
+                    setTag("route", route.ktorRoute.toString())
+                    setTag("response", moviesJson)
+                  }
                 }
               }
 
@@ -124,16 +139,22 @@ fun Routing.route(movieController: MovieController) {
                 ),
                 example = responseMovie
               ) { (id) ->
-                val result = commands.get(id).await()
-                result?.let {
-                  respond(Json.decodeFromString(it))
-                  logger.trace("Data from Redis")
-                } ?: run {
-                  val movie = movieController.getMovie(id) ?: return@get
-                  commands.set(id, Json.encodeToString(movie))
-                  commands.expire(id, 50)
-                  logger.trace("Data from MongoDB")
-                  respond(movie)
+                span("getMovie") {
+                  val result = commands.get(id).await()
+                  result?.let {
+                    respond(Json.decodeFromString(it))
+                    setTag("route", route.ktorRoute.toString())
+                    setTag("response", it)
+                    logger.trace("Data from Redis")
+                  } ?: run {
+                    val movie = movieController.getMovie(id) ?: return@get
+                    respond(movie)
+                    val movieJson = Json.encodeToString(movie)
+                    commands.setex(id, 50, movieJson)
+                    setTag("route", route.ktorRoute.toString())
+                    setTag("response", movieJson)
+                    logger.trace("Data from MongoDB")
+                  }
                 }
               }
 

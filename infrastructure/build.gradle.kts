@@ -16,6 +16,50 @@ val kotlinLogging_version: String by project
 val opentracingDecorator_version: String by project
 val opentracingLettuce_version: String by project
 
+plugins {
+    id("com.google.cloud.tools.jib") version "3.1.2"
+}
+
+java {
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+val appMainClassName by extra("io.ktor.server.netty.EngineMain")
+
+val defaultAppJvmArgs = listOf(
+    "-server",
+    "-Djava.awt.headless=true",
+    "-XX:+UseG1GC",
+    "-XX:+UseStringDeduplication",
+    "-XX:MaxDirectMemorySize=5G"
+)
+
+val devJvmArgs = listOf(
+    "-Xms128m",
+    "-Xmx2g",
+    "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006"
+)
+
+application {
+    mainClass.set(appMainClassName)
+    applicationDefaultJvmArgs = defaultAppJvmArgs + devJvmArgs
+}
+
+jib {
+    from {
+        image = "azul/zulu-openjdk-alpine:16.0.0"
+    }
+    to {
+        image = "ktor-server"
+        tags = setOf("${project.version}")
+    }
+    container {
+        ports = listOf("8080")
+        mainClass = appMainClassName
+        jvmFlags = defaultAppJvmArgs
+    }
+}
+
 dependencies {
     // Module dependencies
     implementation(project(":core"))
@@ -74,4 +118,8 @@ dependencies {
     // Kotlin Logging
     implementation("io.github.microutils:kotlin-logging-jvm:$kotlinLogging_version")
     implementation("com.github.fstien:kotlin-logging-opentracing-decorator:$opentracingDecorator_version")
+
+    implementation("biz.paluch.logging:logstash-gelf:1.14.1")
+
+    implementation("io.micrometer:micrometer-registry-elastic:1.7.2")
 }

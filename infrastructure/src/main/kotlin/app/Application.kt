@@ -62,10 +62,22 @@ fun Application.main() {
 
 fun Application.moduleWithDependencies(movieController: MovieController) {
 
+  // Prometheus registry
   val appMicrometerRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
   install(MicrometerMetrics) {
+
     registry = appMicrometerRegistry
+
+    // Elasticsearch registry
+    /*val elasticRegistry = ElasticMeterRegistry(
+      object : ElasticConfig {
+        override fun get(k: String) = null
+        override fun host() = "http://elasticsearch:9200"
+      },
+      Clock.SYSTEM
+    )
+    registry = elasticRegistry*/
   }
 
   install(RedisFactory) {
@@ -109,6 +121,7 @@ fun Application.moduleWithDependencies(movieController: MovieController) {
 
     route(movieController)
 
+    // Prometheus metrics endpoint
     get("/metrics") {
       call.respond(appMicrometerRegistry.scrape())
     }

@@ -19,6 +19,7 @@ val jacocoExcludes = listOf(
 )
 
 plugins {
+    application
     kotlin("jvm")
     kotlin("plugin.serialization")
     jacoco
@@ -32,6 +33,7 @@ apply {
 }
 
 allprojects {
+
     group = "com.github.vitormbgoncalves.starwarsmovies"
     version = "0.0.1-SNAPSHOT"
 
@@ -42,6 +44,7 @@ allprojects {
         maven(url = "https://jitpack.io")
     }
 
+    apply(plugin = "application")
     apply(plugin = "kotlin")
     apply(plugin = "kotlinx-serialization")
     apply(plugin = "jacoco")
@@ -57,6 +60,7 @@ allprojects {
 }
 
 subprojects {
+
     tasks {
         withType<KotlinCompile<*>> {
             kotlinOptions {

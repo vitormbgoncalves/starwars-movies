@@ -1,62 +1,165 @@
 version: "3.8"
 services:
-  jaeger_star_wars:
-    container_name: jaeger_star_wars
-    image: jaegertracing/all-in-one:1.20
-    environment:
-      - "COLLECTOR_ZIPKIN_HTTP_PORT=9411"
+
+  ktor-server-swm:
+    container_name: ktor-server-swm
+    image: ktor-server
     ports:
-      - "5775:5775/udp"
-      - "6831:6831/udp"
-      - "6832:6832/udp"
-      - "5778:5778"
-      - "16686:16686"
-      - "14268:14268"
-      - "14250:14250"
-      - "9411:9411"
+    - 8080:8080
+    networks:
+    - elastic
 
   prometheus_star_wars:
     container_name: prometheus_star_wars
     image: prometheus-star-wars
-    network_mode: "host"
+    user: root
+    ports:
+    - 9090:9090
+    networks:
+    - elastic
 
   grafana_star_wars:
     container_name: grafana_star_wars
     image: grafana/grafana:6.5.0
-    network_mode: "host"
+    ports:
+    - 3000:3000
+    networks:
+    - elastic
 
-#  # se ocorrer [1]: max virtual memory areas vm.max_map_count [65530] is too low,
-#  # increase to at least [262144]
-#  # sudo sysctl -w vm.max_map_count=262144
-#  elastic:
-#    container_name: elasticsearch
-#    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
-#    network_mode: "host"
-#    environment:
-#      - node.name=es01
-#      - cluster.name=es-docker-cluster
-#      - cluster.initial_master_nodes=es01
-#      - bootstrap.memory_lock=true
-#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-#    ulimits:
-#      memlock:
-#        soft: -1
-#        hard: -1
-#
-#  kibana:
-#    container_name: kibana
-#    image: docker.elastic.co/kibana/kibana:7.6.2
-#    network_mode: "host"
-#    environment:
-#      ELASTICSEARCH_HOSTS: http://localhost:9200
-#
-#  logstash:
-#    container_name: logstash
-#    image: docker.elastic.co/logstash/logstash-oss:6.8.2
-#    volumes:
-#      - source: ./pipelines
-#        target: /usr/share/logstash/pipeline
-#        type: bind
-#    network_mode: "host"
-#    depends_on:
-#      - elastic
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.3
+    environment:
+    - bootstrap.memory_lock=true
+    - cluster.name=docker-cluster
+    - cluster.routing.allocation.disk.threshold_enabled=false
+    - discovery.type=single-node
+    - ES_JAVA_OPTS=-XX:UseAVX=2 -Xms1g -Xmx1g
+    ulimits:
+      memlock:
+        hard: -1
+        soft: -1
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+    - 9200:9200
+    networks:
+    - elastic
+    healthcheck:
+      interval: 20s
+      retries: 10
+      test: curl -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"'
+
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:7.13.3
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+    - 5601:5601
+    networks:
+    - elastic
+    healthcheck:
+      interval: 10s
+      retries: 20
+      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:5601/api/status
+
+  logstash:
+    container_name: logstash
+    image: docker.elastic.co/logstash/logstash-oss:7.13.3
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    ports:
+    - 12201:12201/udp
+    - 5044:5044
+    networks:
+    - elastic
+    environment:
+    - "xpack.monitoring.elasticsearch.url=http://elasticsearch:9200"
+    volumes:
+    - source: ./pipelines
+      target: /usr/share/logstash/pipeline
+      type: bind
+    links:
+    - elasticsearch:elasticsearch
+    command: logstash -f /usr/share/logstash/pipeline/ --config.reload.automatic
+
+  apm-server:
+    container_name: apm-server
+    image: docker.elastic.co/apm/apm-server:7.13.3
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+    cap_add: [ "CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID" ]
+    cap_drop: [ "ALL" ]
+    ports:
+    - 8200:8200
+    networks:
+    - elastic
+    command: >
+      apm-server -e
+        -E apm-server.rum.enabled=true
+        -E setup.kibana.host=kibana:5601
+        -E setup.template.settings.index.number_of_replicas=0
+        -E apm-server.kibana.enabled=true
+        -E apm-server.kibana.host=kibana:5601
+        -E output.elasticsearch.hosts=["elasticsearch:9200"]
+    healthcheck:
+      interval: 10s
+      retries: 12
+      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:8200/
+
+  metricbeat:
+    container_name: metricbeat
+    image: metricbeat_deployment_metricbeat
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    user: root
+    networks:
+      - elastic
+    environment:
+      - ELASTICSEARCH_HOST=["elasticsearch:9200"]
+      - KIBANA_HOST=kibana:5601
+
+  jaeger:
+    container_name: jaeger
+    image: jaegertracing/all-in-one:1.24
+    command: [ "--reporter.grpc.host-port=apm-server:8200" ]
+    ports:
+    - 5775:5775/udp
+    - 6831:6831/udp
+    - 6832:6832/udp
+    - 5778:5778
+    - 16686:16686
+    networks:
+    - elastic
+    restart: on-failure
+
+#  jaeger
+#    container_name: jaeger-agent
+#    image: jaegertracing/jaeger-agent:1.24
+#    command: [ "--reporter.grpc.host-port=apm-server:8200" ]
+#    ports:
+#    - 5775:5775/udp
+#    - 6831:6831/udp
+#    - 6832:6832/udp
+#    - 5778:5778
+#    networks:
+#     - elastic
+#    restart: on-failure
+
+volumes:
+  esdata:
+    driver: local
+
+networks:
+  elastic:
+    driver: bridge

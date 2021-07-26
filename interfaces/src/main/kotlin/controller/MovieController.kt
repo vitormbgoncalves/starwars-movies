@@ -10,9 +10,7 @@ import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.ResponseMovieDT
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.toMovie
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.toResponseAllMovies
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.dto.toResponseMovieDTO
-import com.papsign.ktor.openapigen.model.schema.DataFormat
 import com.typesafe.config.ConfigFactory
-import kotlin.math.ceil
 
 /**
  * Controller for movies

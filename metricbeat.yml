@@ -1,0 +1,27 @@
+metricbeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+processors:
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+
+output.elasticsearch:
+  hosts: '${ELASTICSEARCH_HOSTS:elasticsearch:9200}'
+setup.kibana:
+  host: '${KIBANA_HOSTS:kibana:5601}'
+
+
+metricbeat.modules:
+  - module: prometheus
+    period: 10s
+    metricsets: [ "collector" ]
+    hosts: [ "prometheus_star_wars:9090" ]
+    metrics_path: /metrics
+
+setup.ilm.enabled: false
+setup.pack.security.enabled: false
+setup.xpack.graph.enabled: false
+setup.xpack.watcher.enabled: false
+setup.xpack.monitoring.enabled: false
+setup.xpack.reporting.enabled: false
