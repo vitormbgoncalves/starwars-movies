@@ -43,12 +43,3 @@ jobs:
           --header "Accept: application/vnd.github.v3.raw" \
           https://api.github.com/repos/codecov/standards/contents/upstream.sh
           bash upstream.sh
-
-  {
-    "fixes": [
-        "/home/runner/work/starwars-movies/starwars-movies>/::"
-    ],
-    "codecov": {
-      "disable_default_path_fixes": true
-    }
-  }
