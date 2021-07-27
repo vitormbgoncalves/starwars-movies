@@ -1,3 +1,4 @@
+@file:Suppress("MagicNumber", "MaxLineLength")
 package com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas
 
 import com.github.vitormbgoncalves.starwarsmovies.core.entities.Series

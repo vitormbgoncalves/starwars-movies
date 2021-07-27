@@ -1,3 +1,4 @@
+@file:Suppress("LongMethod", "MagicNumber", "MaxLineLength")
 package com.github.vitormbgoncalves.starwarsmovies.infrastructure.routes
 
 import cn.zenliu.ktor.redis.RedisFactory
@@ -31,16 +32,13 @@ import com.zopa.ktor.opentracing.span
 import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.auth.OAuthAccessTokenResponse
-import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.request.uri
 import io.ktor.response.respond
 import io.ktor.response.respondRedirect
 import io.ktor.routing.Routing
 import io.ktor.routing.application
 import io.ktor.routing.get
 import io.ktor.routing.route
-import io.ktor.routing.routing
 import io.lettuce.core.api.StatefulRedisConnection
 import io.lettuce.core.api.async.RedisAsyncCommands
 import io.lettuce.core.codec.StringCodec
@@ -49,8 +47,6 @@ import kotlinx.coroutines.future.await
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import mu.KotlinLogging
-import org.litote.kmongo.MongoOperator
-import org.litote.kmongo.json
 
 /**
  * Ktor routing controller
@@ -86,7 +82,6 @@ fun Routing.route(movieController: MovieController) {
     )*/
 
     call.respond(application.openAPIGen.api.serialize())
-
   }
   get("/") {
     call.respondRedirect("/swagger-ui/index.html?url=/openapi.json", true)

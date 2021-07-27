@@ -20,6 +20,7 @@ data class PageQuery(
   @QueryParam("Page size") val size: Int
 )
 
+@Suppress("EnumNaming")
 enum class Tag(override val description: String) : APITag {
   `Star Wars films`("V.1 API.")
 }

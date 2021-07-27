@@ -14,6 +14,7 @@ import org.litote.kmongo.coroutine.CoroutineClient
  * @since 10.06.2021, qui, 19:05
  */
 
+@Suppress("TooGenericExceptionCaught", "MagicNumber")
 object MongoHealthCheck : KoinComponent {
 
   private val client: CoroutineClient by inject()

@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit
  * @since 12.06.2021, sáb, 14:49
  */
 
+@Suppress("MagicNumber")
 @OptIn(ExperimentalStdlibApi::class)
 fun Application.installAuth() {
 

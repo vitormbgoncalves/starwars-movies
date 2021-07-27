@@ -31,6 +31,7 @@ object OpenTracing {
 
   fun listener() = TracingCommandListener.Builder(tracer).build()
 
+  @Suppress("MagicNumber")
   private val tracer = Configuration("star-wars-movies-tracing")
     .withSampler(
       Configuration.SamplerConfiguration.fromEnv()

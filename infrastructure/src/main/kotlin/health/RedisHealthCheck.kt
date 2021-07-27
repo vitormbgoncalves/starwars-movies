@@ -14,6 +14,7 @@ import org.koin.core.component.KoinComponent
  * @since 10.06.2021, qui, 19:05
  */
 
+@Suppress("TooGenericExceptionCaught", "MagicNumber")
 object RedisHealthCheck : KoinComponent {
 
   private val client = RedisFactory.newReactiveClient(StringCodec.UTF8)

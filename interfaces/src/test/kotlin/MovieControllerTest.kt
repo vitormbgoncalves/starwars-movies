@@ -105,7 +105,7 @@ object MovieControllerTest : Spek({
       runBlocking {
         coEvery { mockMovieService.findAll(any(), any()) } returns listOf(movie)
         coEvery { mockMovieService.totalMovies() } returns 1
-        coInvoking { movieController.getMoviesPage(0, 0) } shouldThrow IllegalArgumentException::class withMessage
+        coInvoking { movieController.getMoviesPage(0, 0) } shouldThrow ArithmeticException::class withMessage
           "/ by zero"
         val movies = movieController.getMoviesPage(1, 1)
         movies shouldBeInstanceOf ResponseAllMovies::class

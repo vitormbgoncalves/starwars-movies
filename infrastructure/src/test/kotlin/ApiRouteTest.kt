@@ -2,11 +2,15 @@ package com.github.vitormbgoncalves.starwarsmovies.infrastructure.test
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.vitormbgoncalves.restapi.JWTAuthHeader
+import com.github.vitormbgoncalves.restapi.JWTAuthPayload
+import com.github.vitormbgoncalves.restapi.jwtAuth
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.app.moduleWithDependencies
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.requestMovie
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.responseAllMovies
 import com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas.responseMovie
 import com.github.vitormbgoncalves.starwarsmovies.interfaces.controller.MovieController
+import com.google.common.io.Resources.getResource
 import io.ktor.config.MapApplicationConfig
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -24,6 +28,7 @@ import org.amshove.kluent.`should be`
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import redis.embedded.RedisServer
+import java.time.Instant
 
 /**
  * API routes tests
@@ -32,7 +37,38 @@ import redis.embedded.RedisServer
  * @since 07.06.2021, seg, 09:50
  */
 
+@Suppress("MaxLineLength")
 object ApiRouteTest : Spek({
+
+  /*
+    JWK authentication provider mock
+     */
+  fun jwtAuthMock(): String {
+
+    val privateKey = getResource("certs/jwt-private-key.pem").readText(Charsets.UTF_8)
+
+    val secret = """(-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----)"""
+      .toRegex().replace(privateKey, "")
+      .trim()
+
+    val header = JWTAuthHeader(
+      "RS256",
+      "JWT", "OZdxpBsB4bmypwduD8tbM8L9JFwo-f8oVzNok2KUBk4"
+    )
+
+    val payload = JWTAuthPayload(
+      Instant.now().epochSecond + 3600,
+      Instant.now().epochSecond,
+      "http://localhost:8180/auth/realms/Ktor",
+      "account"
+    )
+
+    return jwtAuth.createToken(secret, header, payload)
+  }
+
+  val jwksURL = getResource("certs/jwks.json").toURI().toString()
+
+  val jwtToken = "Bearer ${jwtAuthMock()}"
 
   describe("API routes testing") {
 
@@ -62,13 +98,19 @@ object ApiRouteTest : Spek({
     with(engine) {
       (environment.config as MapApplicationConfig).apply {
         put("redis.url", "redis://127.0.0.1:6379/0?timeout=10s")
+        put("OAuth2.jwkIssuer", "http://localhost:8180/auth/realms/Ktor")
+        put("OAuth2.jwksURL", jwksURL)
+        put("OAuth2.jwkRealm", "ktor")
+        put("OAuth2.audience", "account")
       }
     }
 
     with(engine) {
       it("should be OK when returning 200 status code") {
         with(
-          handleRequest(HttpMethod.Get, "/openapi.json")
+          handleRequest(HttpMethod.Get, "/openapi.json") {
+            addHeader("Authorization", jwtToken)
+          }
         ) {
           response.status() `should be` (HttpStatusCode.OK)
         }
@@ -76,7 +118,9 @@ object ApiRouteTest : Spek({
 
       it("should be OK when returning 301 status code") {
         with(
-          handleRequest(HttpMethod.Get, "/")
+          handleRequest(HttpMethod.Get, "/") {
+            addHeader("Authorization", jwtToken)
+          }
         ) {
           response.status() `should be` (HttpStatusCode.MovedPermanently)
         }
@@ -87,7 +131,9 @@ object ApiRouteTest : Spek({
         coEvery { movieController.getMoviesPage(1, 1) } returns responseAllMovies
 
         with(
-          handleRequest(HttpMethod.Get, "/star-wars/movies?page=1&size=1")
+          handleRequest(HttpMethod.Get, "/star-wars/movies?page=1&size=1") {
+            addHeader("Authorization", jwtToken)
+          }
         ) {
           response.status() `should be` (HttpStatusCode.OK)
           coVerify { movieController.getMoviesPage(1, 1) }
@@ -99,7 +145,9 @@ object ApiRouteTest : Spek({
         coEvery { movieController.getMovie(any()) } returns responseMovie
 
         with(
-          handleRequest(HttpMethod.Get, "/star-wars/movies/60ac1ae25a74bf51382c469e")
+          handleRequest(HttpMethod.Get, "/star-wars/movies/60ac1ae25a74bf51382c469e") {
+            addHeader("Authorization", jwtToken)
+          }
         ) {
           response.status() `should be` (HttpStatusCode.OK)
           coVerify { movieController.getMovie("60ac1ae25a74bf51382c469e") }
@@ -108,13 +156,14 @@ object ApiRouteTest : Spek({
 
       it("should be OK when returning 404 status code") {
 
-        coEvery { movieController.getMovie(any()) } returns null
-
+        coEvery { movieController.getMovie(any()) } throws IllegalArgumentException("movie with the given id not found!")
         with(
-          handleRequest(HttpMethod.Get, "/star-wars/movies/60ac1ae25a74bf51382c469e")
+          handleRequest(HttpMethod.Get, "/star-wars/movies/60ac1ae25a74bf51382c569e") {
+            addHeader("Authorization", jwtToken)
+          }
         ) {
           response.status() `should be` (HttpStatusCode.NotFound)
-          coVerify { movieController.getMovie("60ac1ae25a74bf51382c469e") }
+          coVerify { movieController.getMovie("60ac1ae25a74bf51382c569e") }
         }
       }
 
@@ -125,7 +174,9 @@ object ApiRouteTest : Spek({
         )
 
         with(
-          handleRequest(HttpMethod.Get, "/star-wars/movies/60bba776d0686920739c3cf")
+          handleRequest(HttpMethod.Get, "/star-wars/movies/60bba776d0686920739c3cf") {
+            addHeader("Authorization", jwtToken)
+          }
         ) {
           response.content `should be equal to` "invalid hexadecimal representation of an ObjectId: [60bba776d0686920739c3cf]"
           coVerify { movieController.getMovie("60bba776d0686920739c3cf") }
@@ -138,6 +189,7 @@ object ApiRouteTest : Spek({
 
         with(
           handleRequest(HttpMethod.Put, "/star-wars/movies/60ac1ae25a74bf51382c469e") {
+            addHeader("Authorization", jwtToken)
             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             setBody(mapper.writeValueAsString(requestMovie))
           }
@@ -153,6 +205,7 @@ object ApiRouteTest : Spek({
 
         with(
           handleRequest(HttpMethod.Post, "/star-wars/movies") {
+            addHeader("Authorization", jwtToken)
             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             setBody(mapper.writeValueAsString(requestMovie))
           }
@@ -167,7 +220,9 @@ object ApiRouteTest : Spek({
         coEvery { movieController.deleteMovie(any()) } returns Unit
 
         with(
-          handleRequest(HttpMethod.Delete, "/star-wars/movies/60ac1ae25a74bf51382c469e")
+          handleRequest(HttpMethod.Delete, "/star-wars/movies/60ac1ae25a74bf51382c469e") {
+            addHeader("Authorization", jwtToken)
+          }
         ) {
           response.status() `should be` (HttpStatusCode.NoContent)
           coVerify { movieController.deleteMovie("60ac1ae25a74bf51382c469e") }

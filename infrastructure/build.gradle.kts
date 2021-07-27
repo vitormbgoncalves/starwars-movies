@@ -122,4 +122,6 @@ dependencies {
     implementation("biz.paluch.logging:logstash-gelf:1.14.1")
 
     implementation("io.micrometer:micrometer-registry-elastic:1.7.2")
+
+    implementation("com.google.guava:guava:30.1.1-jre")
 }

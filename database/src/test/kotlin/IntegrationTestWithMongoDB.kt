@@ -5,6 +5,7 @@ import com.github.vitormbgoncalves.starwarsmovies.core.entities.Series
 import com.github.vitormbgoncalves.starwarsmovies.core.entities.Trilogy
 import com.github.vitormbgoncalves.starwarsmovies.core.usecases.repository.IMovieRepository
 import com.github.vitormbgoncalves.starwarsmovies.database.MongoDBMovieRepository
+import com.mongodb.MongoWriteException
 import de.flapdoodle.embed.mongo.MongodExecutable
 import de.flapdoodle.embed.mongo.MongodProcess
 import de.flapdoodle.embed.mongo.MongodStarter
@@ -69,7 +70,7 @@ object IntegrationTestWithMongoDB : Spek({
 
     it("do not create movie with repeated id") {
       runBlocking {
-        coInvoking { movieRepository.create(movie2) } shouldThrow IllegalArgumentException::class withMessage
+        coInvoking { movieRepository.create(movie2) } shouldThrow MongoWriteException::class withMessage
           "E11000 duplicate key error collection: movies.movies index: _id_ dup key: " +
           "{ : ObjectId('60bba776d0686920739c3cf5') }"
       }

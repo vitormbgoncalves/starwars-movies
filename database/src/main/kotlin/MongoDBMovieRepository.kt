@@ -38,38 +38,30 @@ class MongoDBMovieRepository(client: CoroutineClient) : IMovieRepository {
   }
 
   override suspend fun create(movie: Movie): Movie {
-    try {
-      moviesCollection.insertOne(movie)
-      return movie
-    } catch (e: Exception) {
-      throw IllegalArgumentException(e.localizedMessage)
-    }
+    moviesCollection.insertOne(movie)
+    return movie
   }
 
   override suspend fun update(id: String, movie: Movie): Movie {
-    try {
-      moviesCollection.updateOne(
-        Movie::id eq ObjectId(id).toId(),
-        set(
-          Movie::title setTo movie.title,
-          Movie::episodeId setTo movie.episodeId,
-          Movie::storyline setTo movie.storyline,
-          Movie::series setTo movie.series,
-          Movie::trilogy setTo movie.trilogy,
-          Movie::releaseDate setTo movie.releaseDate,
-          Movie::director setTo movie.director,
-          Movie::screenwriters setTo movie.screenwriters,
-          Movie::storyBy setTo movie.storyBy,
-          Movie::producers setTo movie.producers,
-          Movie::imdbScore setTo movie.imdbScore,
-          Movie::edited setTo LocalDateTime.now()
-        )
+    moviesCollection.updateOne(
+      Movie::id eq ObjectId(id).toId(),
+      set(
+        Movie::title setTo movie.title,
+        Movie::episodeId setTo movie.episodeId,
+        Movie::storyline setTo movie.storyline,
+        Movie::series setTo movie.series,
+        Movie::trilogy setTo movie.trilogy,
+        Movie::releaseDate setTo movie.releaseDate,
+        Movie::director setTo movie.director,
+        Movie::screenwriters setTo movie.screenwriters,
+        Movie::storyBy setTo movie.storyBy,
+        Movie::producers setTo movie.producers,
+        Movie::imdbScore setTo movie.imdbScore,
+        Movie::edited setTo LocalDateTime.now()
       )
-      return moviesCollection.findOneById(ObjectId(id))
-        ?: throw IllegalArgumentException("movie with the given id not found!")
-    } catch (e: Exception) {
-      throw IllegalArgumentException(e.localizedMessage)
-    }
+    )
+    return moviesCollection.findOneById(ObjectId(id))
+      ?: throw IllegalArgumentException("movie with the given id not found!")
   }
 
   override suspend fun delete(id: String) {

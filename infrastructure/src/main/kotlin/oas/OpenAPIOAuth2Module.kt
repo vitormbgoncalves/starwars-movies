@@ -1,3 +1,4 @@
+@file:Suppress("LongParameterList", "FunctionNaming", "MagicNumber", "UnusedPrivateMember", "EnumNaming")
 package com.github.vitormbgoncalves.starwarsmovies.infrastructure.oas
 
 import com.papsign.ktor.openapigen.APIException
@@ -77,7 +78,7 @@ class OAuth2Handler<A, T>(
 
   private inner class OAuth2Provider(scopes: List<T>) : AuthProvider<A> {
     override suspend fun getAuth(pipeline: PipelineContext<Unit, ApplicationCall>): A =
-      getOAuth(pipeline.call.principal() ?: throw RuntimeException("No JWTPrincipal"))
+      getOAuth(pipeline.call.principal() ?: throw IllegalArgumentException("No JWTPrincipal"))
 
     override fun apply(route: NormalOpenAPIRoute): OpenAPIAuthenticatedRoute<A> =
       OpenAPIAuthenticatedRoute(route.ktorRoute.authenticate(authName) {}, route.provider.child(), this).throws(
