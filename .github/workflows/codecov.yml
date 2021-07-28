@@ -24,14 +24,12 @@ jobs:
         run: |
           chmod +x gradlew
           chmod +x gradle/wrapper/gradle-wrapper.jar
-      - name: Run Script
-        env:
-          API_KEY: ${{ secrets.API_KEY }}
-          CORRECT_COVERAGE: ${{ secrets.CORRECT_COVERAGE }}
+      - name: Code coverage
         run: |
           ./gradlew detektGenerateConfig
           ./gradlew build
           ./gradlew test
           ./gradlew jacocoTestReport
+          ./gradlew jacocoTestCoverageVerification
           ./gradlew jacocoMergeReport
           bash <(curl -s https://codecov.io/bash)
