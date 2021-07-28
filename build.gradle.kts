@@ -74,7 +74,6 @@ allprojects {
     dependencies {
         runtimeOnly(project(":infrastructure"))
     }
-
 }
 
 subprojects {
