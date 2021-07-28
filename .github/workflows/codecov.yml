@@ -32,8 +32,9 @@ jobs:
           ./gradlew detektGenerateConfig
           ./gradlew build
           ./gradlew test
+          ./gradlew jacocoTestReport
+          ./gradlew jacocoMergeReport
           bash <(curl -s https://codecov.io/bash)
-          ./gradlew run
       - name: Upstream to Standards
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
