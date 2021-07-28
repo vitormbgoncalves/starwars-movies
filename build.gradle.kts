@@ -33,13 +33,6 @@ apply {
     from("./jacoco.gradle.kts")
 }
 
-tasks.jacocoTestReport {
-    reports {
-        xml.required.set(true)
-        csv.required.set(false)
-    }
-}
-
 allprojects {
 
     group = "com.github.vitormbgoncalves.starwarsmovies"
@@ -108,7 +101,7 @@ subprojects {
         jacocoTestReport {
             dependsOn(test)
             reports {
-                xml.required.set(true)
+                xml.required.set(false)
                 csv.required.set(false)
             }
         }

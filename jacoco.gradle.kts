@@ -72,6 +72,8 @@ tasks {
     withType<JacocoReport> {
         reports {
             html.destination = file("$buildDir/reports/jacoco/jacocoFullReport")
+            xml.required.set(true)
+            csv.required.set(false)
         }
         afterEvaluate {
             classDirectories.setFrom(
