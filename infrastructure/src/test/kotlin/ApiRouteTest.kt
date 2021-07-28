@@ -97,7 +97,6 @@ object ApiRouteTest : Spek({
 
     with(engine) {
       (environment.config as MapApplicationConfig).apply {
-        put("redis.url", "redis://127.0.0.1:6379/0?timeout=10s")
         put("OAuth2.jwkIssuer", "http://localhost:8180/auth/realms/Ktor")
         put("OAuth2.jwksURL", jwksURL)
         put("OAuth2.jwkRealm", "ktor")
