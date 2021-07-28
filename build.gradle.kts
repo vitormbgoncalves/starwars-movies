@@ -26,6 +26,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint")
     id("io.gitlab.arturbosch.detekt")
     id("com.adarshr.test-logger")
+    id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
 apply {
@@ -48,6 +49,7 @@ allprojects {
     apply(plugin = "kotlin")
     apply(plugin = "kotlinx-serialization")
     apply(plugin = "jacoco")
+    apply(plugin = "com.github.johnrengelman.shadow")
 
     jacoco {
         toolVersion = "0.8.7"
@@ -56,6 +58,14 @@ allprojects {
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    application {
+        mainClass.set("io.ktor.server.netty.EngineMain")
+    }
+
+    dependencies {
+        runtimeOnly(project(":infrastructure"))
     }
 }
 
