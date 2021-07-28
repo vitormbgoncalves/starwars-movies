@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '16'
-          distribution: 'adopt'
+          distribution: 'zulu'
       - name: Before Install
         run: |
           chmod +x gradlew
