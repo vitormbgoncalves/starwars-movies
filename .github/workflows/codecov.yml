@@ -28,7 +28,5 @@ jobs:
           ./gradlew detektGenerateConfig
           ./gradlew build
           ./gradlew test
-          ./gradlew jacocoTestReport
-          ./gradlew jacocoTestCoverageVerification
-          ./gradlew jacocoMergeReport
+          ./gradlew jacocoFullReport
           bash <(curl -s https://codecov.io/bash)
