@@ -62,6 +62,7 @@ val jacocoExcludes = listOf(
     "**/core/**",
     "**/commonlib/**",
     "**/dto/**",
+    "**/oas/**",
     "**/health/**",
     "**/app/**",
     "**/openAPIGeneratorConfig/**",
