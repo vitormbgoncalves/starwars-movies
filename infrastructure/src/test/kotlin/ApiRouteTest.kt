@@ -127,7 +127,7 @@ object ApiRouteTest : Spek({
 
       it("should be OK when returning 200 status code") {
 
-        coEvery { movieController.getMoviesPage(1, 1) } returns responseAllMovies
+        coEvery { movieController.getMoviesWithPagination(1, 1) } returns responseAllMovies
 
         with(
           handleRequest(HttpMethod.Get, "/star-wars/movies?page=1&size=1") {
@@ -135,7 +135,7 @@ object ApiRouteTest : Spek({
           }
         ) {
           response.status() `should be` (HttpStatusCode.OK)
-          coVerify { movieController.getMoviesPage(1, 1) }
+          coVerify { movieController.getMoviesWithPagination(1, 1) }
         }
       }
 

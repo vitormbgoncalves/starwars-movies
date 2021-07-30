@@ -36,9 +36,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.response.respondRedirect
 import io.ktor.routing.Routing
-import io.ktor.routing.application
 import io.ktor.routing.get
-import io.ktor.routing.route
 import io.lettuce.core.api.StatefulRedisConnection
 import io.lettuce.core.api.async.RedisAsyncCommands
 import io.lettuce.core.codec.StringCodec
@@ -116,7 +114,7 @@ fun Routing.route(movieController: MovieController) {
                     setTag("response", it)
                     logger.trace("Data from Redis")
                   } ?: run {
-                    val movies = movieController.getMoviesPage(page, size)
+                    val movies = movieController.getMoviesWithPagination(page, size)
                     respond(movies)
                     val moviesJson = Json.encodeToString(movies)
                     commands.setex("page=$page&size=$size", 20, moviesJson)

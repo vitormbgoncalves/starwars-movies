@@ -41,7 +41,7 @@ class MovieController(private val movieService: IMovieService) {
   }
 
   @Suppress("")
-  suspend fun getMoviesPage(page: Int, size: Int): ResponseAllMovies {
+  suspend fun getMoviesWithPagination(page: Int, size: Int): ResponseAllMovies {
     val movies = movieService.findAll(page - 1, size).map { it.toResponseAllMovies() }
     val totalMovies = movieService.totalMovies()
     val paginating = ((totalMovies + size - 1) / size)

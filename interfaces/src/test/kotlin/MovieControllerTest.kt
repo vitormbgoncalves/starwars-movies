@@ -103,14 +103,25 @@ object MovieControllerTest : Spek({
     }
     it("get movies with pagination") {
       runBlocking {
-        coEvery { mockMovieService.findAll(any(), any()) } returns listOf(movie)
-        coEvery { mockMovieService.totalMovies() } returns 1
-        coInvoking { movieController.getMoviesPage(0, 0) } shouldThrow ArithmeticException::class withMessage
+        coEvery { mockMovieService.findAll(0, 4) } returns listOf(movie, movie, movie, movie)
+        coEvery { mockMovieService.findAll(0, 2) } returns listOf(movie, movie)
+        coEvery { mockMovieService.findAll(1, 2) } returns listOf(movie, movie)
+        coEvery { mockMovieService.findAll(-1, 0) } throws ArithmeticException("/ by zero")
+        coEvery { mockMovieService.totalMovies() } returns 4
+        coInvoking { movieController.getMoviesWithPagination(0, 0) } shouldThrow ArithmeticException::class withMessage
           "/ by zero"
-        val movies = movieController.getMoviesPage(1, 1)
-        movies shouldBeInstanceOf ResponseAllMovies::class
-        Json.encodeToString(movies) shouldBeEqualTo allMoviesJson
-        coVerify { mockMovieService.findAll(0, 1) }
+        val movies1 = movieController.getMoviesWithPagination(1, 4)
+        val movies2 = movieController.getMoviesWithPagination(1, 2)
+        val movies3 = movieController.getMoviesWithPagination(2, 2)
+        movies1 shouldBeInstanceOf ResponseAllMovies::class
+        movies2 shouldBeInstanceOf ResponseAllMovies::class
+        movies3 shouldBeInstanceOf ResponseAllMovies::class
+        Json.encodeToString(movies1) shouldBeEqualTo allMoviesJson1
+        Json.encodeToString(movies2) shouldBeEqualTo allMoviesJson2
+        Json.encodeToString(movies3) shouldBeEqualTo allMoviesJson3
+        coVerify { mockMovieService.findAll(0, 4) }
+        coVerify { mockMovieService.findAll(0, 2) }
+        coVerify { mockMovieService.findAll(0, 2) }
         coVerify { mockMovieService.totalMovies() }
       }
     }
@@ -184,30 +195,11 @@ private const val movieJson2 =
     "\"created\":\"2021/06/02 06:30:40\"," +
     "\"edited\":\"2021/06/02 06:30:40\"}"
 
-private const val allMoviesJson =
-  "{\"_links\":{" +
-    "\"self\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies?page=1&size=1\"}," +
-    "\"first\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies/?page=1&size=1\"}," +
-    "\"prev\":{\"href\":null}," +
-    "\"next\":{\"href\":null}," +
-    "\"last\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies?page=1&size=1\"}," +
-    "\"curries\":{\"name\":\"ns\",\"href\":\"http://127.0.0.1:8080/star-wars\"}}," +
-    "\"_embedded\":{" +
-    "\"ns:movies\":[{" +
-    "\"_links\":{" +
-    "\"self\":{\"href\":\"/movies/60ac1ae25a74bf51382c469e\"}}," +
-    "\"id\":\"60ac1ae25a74bf51382c469e\"," +
-    "\"title\":\"A New Hope\"," +
-    "\"episodeId\":4," +
-    "\"storyline\":\"Princess Leia is captured...\"," +
-    "\"series\":\"SKYWALKER_SAGA\"," +
-    "\"trilogy\":\"ORIGINAL\"," +
-    "\"releaseDate\":\"1977-05-25\"," +
-    "\"director\":\"George Lucas\"," +
-    "\"screenwriters\":[\"George Lucas\"]," +
-    "\"storyBy\":[\"George Lucas\"]," +
-    "\"producers\":[\"Gary Kurtz\"]," +
-    "\"imdbScore\":8.6," +
-    "\"created\":\"2021/06/02 06:30:40\"," +
-    "\"edited\":\"2021/06/02 06:30:40\"}]}," +
-    "\"info\":{\"count\":1,\"pages\":1}}"
+private const val allMoviesJson1 =
+  "{\"_links\":{\"self\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies?page=1&size=4\"},\"first\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies/?page=1&size=4\"},\"prev\":{\"href\":null},\"next\":{\"href\":null},\"last\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies?page=1&size=4\"},\"curries\":{\"name\":\"ns\",\"href\":\"http://127.0.0.1:8080/star-wars\"}},\"_embedded\":{\"ns:movies\":[{\"_links\":{\"self\":{\"href\":\"/movies/60ac1ae25a74bf51382c469e\"}},\"id\":\"60ac1ae25a74bf51382c469e\",\"title\":\"A New Hope\",\"episodeId\":4,\"storyline\":\"Princess Leia is captured...\",\"series\":\"SKYWALKER_SAGA\",\"trilogy\":\"ORIGINAL\",\"releaseDate\":\"1977-05-25\",\"director\":\"George Lucas\",\"screenwriters\":[\"George Lucas\"],\"storyBy\":[\"George Lucas\"],\"producers\":[\"Gary Kurtz\"],\"imdbScore\":8.6,\"created\":\"2021/06/02 06:30:40\",\"edited\":\"2021/06/02 06:30:40\"},{\"_links\":{\"self\":{\"href\":\"/movies/60ac1ae25a74bf51382c469e\"}},\"id\":\"60ac1ae25a74bf51382c469e\",\"title\":\"A New Hope\",\"episodeId\":4,\"storyline\":\"Princess Leia is captured...\",\"series\":\"SKYWALKER_SAGA\",\"trilogy\":\"ORIGINAL\",\"releaseDate\":\"1977-05-25\",\"director\":\"George Lucas\",\"screenwriters\":[\"George Lucas\"],\"storyBy\":[\"George Lucas\"],\"producers\":[\"Gary Kurtz\"],\"imdbScore\":8.6,\"created\":\"2021/06/02 06:30:40\",\"edited\":\"2021/06/02 06:30:40\"},{\"_links\":{\"self\":{\"href\":\"/movies/60ac1ae25a74bf51382c469e\"}},\"id\":\"60ac1ae25a74bf51382c469e\",\"title\":\"A New Hope\",\"episodeId\":4,\"storyline\":\"Princess Leia is captured...\",\"series\":\"SKYWALKER_SAGA\",\"trilogy\":\"ORIGINAL\",\"releaseDate\":\"1977-05-25\",\"director\":\"George Lucas\",\"screenwriters\":[\"George Lucas\"],\"storyBy\":[\"George Lucas\"],\"producers\":[\"Gary Kurtz\"],\"imdbScore\":8.6,\"created\":\"2021/06/02 06:30:40\",\"edited\":\"2021/06/02 06:30:40\"},{\"_links\":{\"self\":{\"href\":\"/movies/60ac1ae25a74bf51382c469e\"}},\"id\":\"60ac1ae25a74bf51382c469e\",\"title\":\"A New Hope\",\"episodeId\":4,\"storyline\":\"Princess Leia is captured...\",\"series\":\"SKYWALKER_SAGA\",\"trilogy\":\"ORIGINAL\",\"releaseDate\":\"1977-05-25\",\"director\":\"George Lucas\",\"screenwriters\":[\"George Lucas\"],\"storyBy\":[\"George Lucas\"],\"producers\":[\"Gary Kurtz\"],\"imdbScore\":8.6,\"created\":\"2021/06/02 06:30:40\",\"edited\":\"2021/06/02 06:30:40\"}]},\"info\":{\"count\":4,\"pages\":1}}"
+
+private const val allMoviesJson2 =
+  "{\"_links\":{\"self\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies?page=1&size=2\"},\"first\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies/?page=1&size=2\"},\"prev\":{\"href\":null},\"next\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies?page=2&size=2\"},\"last\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies?page=2&size=2\"},\"curries\":{\"name\":\"ns\",\"href\":\"http://127.0.0.1:8080/star-wars\"}},\"_embedded\":{\"ns:movies\":[{\"_links\":{\"self\":{\"href\":\"/movies/60ac1ae25a74bf51382c469e\"}},\"id\":\"60ac1ae25a74bf51382c469e\",\"title\":\"A New Hope\",\"episodeId\":4,\"storyline\":\"Princess Leia is captured...\",\"series\":\"SKYWALKER_SAGA\",\"trilogy\":\"ORIGINAL\",\"releaseDate\":\"1977-05-25\",\"director\":\"George Lucas\",\"screenwriters\":[\"George Lucas\"],\"storyBy\":[\"George Lucas\"],\"producers\":[\"Gary Kurtz\"],\"imdbScore\":8.6,\"created\":\"2021/06/02 06:30:40\",\"edited\":\"2021/06/02 06:30:40\"},{\"_links\":{\"self\":{\"href\":\"/movies/60ac1ae25a74bf51382c469e\"}},\"id\":\"60ac1ae25a74bf51382c469e\",\"title\":\"A New Hope\",\"episodeId\":4,\"storyline\":\"Princess Leia is captured...\",\"series\":\"SKYWALKER_SAGA\",\"trilogy\":\"ORIGINAL\",\"releaseDate\":\"1977-05-25\",\"director\":\"George Lucas\",\"screenwriters\":[\"George Lucas\"],\"storyBy\":[\"George Lucas\"],\"producers\":[\"Gary Kurtz\"],\"imdbScore\":8.6,\"created\":\"2021/06/02 06:30:40\",\"edited\":\"2021/06/02 06:30:40\"}]},\"info\":{\"count\":4,\"pages\":2}}"
+
+private const val allMoviesJson3 =
+  "{\"_links\":{\"self\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies?page=2&size=2\"},\"first\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies/?page=1&size=2\"},\"prev\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies?page=1&size=2\"},\"next\":{\"href\":null},\"last\":{\"href\":\"http://127.0.0.1:8080/star-wars/movies?page=2&size=2\"},\"curries\":{\"name\":\"ns\",\"href\":\"http://127.0.0.1:8080/star-wars\"}},\"_embedded\":{\"ns:movies\":[{\"_links\":{\"self\":{\"href\":\"/movies/60ac1ae25a74bf51382c469e\"}},\"id\":\"60ac1ae25a74bf51382c469e\",\"title\":\"A New Hope\",\"episodeId\":4,\"storyline\":\"Princess Leia is captured...\",\"series\":\"SKYWALKER_SAGA\",\"trilogy\":\"ORIGINAL\",\"releaseDate\":\"1977-05-25\",\"director\":\"George Lucas\",\"screenwriters\":[\"George Lucas\"],\"storyBy\":[\"George Lucas\"],\"producers\":[\"Gary Kurtz\"],\"imdbScore\":8.6,\"created\":\"2021/06/02 06:30:40\",\"edited\":\"2021/06/02 06:30:40\"},{\"_links\":{\"self\":{\"href\":\"/movies/60ac1ae25a74bf51382c469e\"}},\"id\":\"60ac1ae25a74bf51382c469e\",\"title\":\"A New Hope\",\"episodeId\":4,\"storyline\":\"Princess Leia is captured...\",\"series\":\"SKYWALKER_SAGA\",\"trilogy\":\"ORIGINAL\",\"releaseDate\":\"1977-05-25\",\"director\":\"George Lucas\",\"screenwriters\":[\"George Lucas\"],\"storyBy\":[\"George Lucas\"],\"producers\":[\"Gary Kurtz\"],\"imdbScore\":8.6,\"created\":\"2021/06/02 06:30:40\",\"edited\":\"2021/06/02 06:30:40\"}]},\"info\":{\"count\":4,\"pages\":2}}"

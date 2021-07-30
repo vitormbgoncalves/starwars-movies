@@ -43,7 +43,7 @@ object OpenTracing {
         .withLogSpans(true)
         .withSender(
           Configuration.SenderConfiguration()
-            .withAgentHost("172.23.0.2")
+            .withAgentHost("jaeger")
             .withAgentPort(6831)
         )
     ).tracerBuilder
