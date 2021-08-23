@@ -15,6 +15,9 @@ val opentracingMongoDB_version: String by project
 val kotlinLogging_version: String by project
 val opentracingDecorator_version: String by project
 val opentracingLettuce_version: String by project
+val logstashGelf_version: String by project
+val micrometerRegistryElastic_version: String by project
+val guava_version: String by project
 
 plugins {
     id("com.google.cloud.tools.jib") version "3.1.2"
@@ -108,6 +111,8 @@ dependencies {
     // Micrometer
     implementation("io.ktor:ktor-metrics-micrometer:$ktor_version")
     implementation("io.micrometer:micrometer-registry-prometheus:$prometeus_version")
+    implementation("io.micrometer:micrometer-registry-elastic:$micrometerRegistryElastic_version")
+    implementation("com.google.guava:guava:$guava_version")
 
     // OpenTracing
     implementation("io.jaegertracing:jaeger-client:$jaegerClient_version")
@@ -119,9 +124,6 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:$kotlinLogging_version")
     implementation("com.github.fstien:kotlin-logging-opentracing-decorator:$opentracingDecorator_version")
 
-    implementation("biz.paluch.logging:logstash-gelf:1.14.1")
-
-    implementation("io.micrometer:micrometer-registry-elastic:1.7.2")
-
-    implementation("com.google.guava:guava:30.1.1-jre")
+    // Logstash GELF appender
+    implementation("biz.paluch.logging:logstash-gelf:$logstashGelf_version")
 }

@@ -7,6 +7,18 @@
 Backend API service built using clean architecture, gradle multi-module and implemented with Kotlin's Ktor framework. This project was created to demonstrate some tools and technologies that facilitate the development of
 applications in Kotlin and also to be used as a foundation for future projects.
 
+# [Live demo](https://starwars-movies-catalog.herokuapp.com/)
+
+An example from the `starwars-movies-catalog` is deployed on [Heroku](https://starwars-movies-catalog.herokuapp.com/), using [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) for database, [OAuth0](https://auth0.com/) for OAuth2 authentication/authorization and [Redis Labs](https://redis.com/) for caching.
+
+You can access the Swagger UI by this url: [https://starwars-movies-catalog.herokuapp.com/](https://starwars-movies-catalog.herokuapp.com/).
+To interact with Swagger UI it is necessary to perform authorization with the data below:
+
+* **username**: user@user.com
+* **password**: !A23082021
+* **client_id**: Nw5E9xQmdFsMTKzDErYNQPN1KTZFDeRJ
+* **client_secret**: TqwZLEWJUPnRn-CC1e1EY6ks6xfSlEyunTyRZFBi5JxlUaE-ns8kW5KVSHedpzbB
+
 # Overview
 
 ## What is Star Wars Movies List?
@@ -26,11 +38,13 @@ So here is a brief overview of each module:
 - **database** - repository implementation for data persistence (MongoDB repository implementation);
 - **infrastructure** - platform/framework specific functionality (e.g. REST API, security, monitoring, caching).
 
-## What tools/frameworks do we use?
+## What tools/frameworks involved?
 
-- **Gradle** - our build system of choice (using Kotlin DSL)
-- **Kotlin 1.5** - our language of choice
+- **Gradle** - our build system of choice (using Kotlin DSL): https://docs.gradle.org/current/userguide/userguide.html
+- **Kotlin 1.5** - our language of choice: https://kotlinlang.org/docs/home.html
 - **ktor** for creating web application: https://github.com/ktorio/ktor
+- **HAL (Hypertext Application Language)**: specification to describe the RESTful resource structure. https://stateless.group/hal_specification.html
+- **Docker** for running dependencies on containers: https://docs.docker.com/ 
 - **MongoDB** for database: https://www.mongodb.com/
 - **KMongo** for access database: //https://github.com/Litote/kmongo
 - **Jackson** for JSON serialization/deserialization: https://github.com/FasterXML/jackson
@@ -38,7 +52,7 @@ So here is a brief overview of each module:
 - **HOCON** for application configuration: https://github.com/lightbend/config/
 - **Redis** for application caching: https://redis.com/
 - **ktor-redis** ktor redis client base on lettuce for caching: https://github.com/ZenLiuCN/ktor-redis
-- **Ktor-OpenAPI-Generator** for OpenAPI/Swagger 3 documentation generation: https://github.com/papsign/Ktor-OpenAPI-Generator
+- **Ktor-OpenAPI-Generator** for OpenAPI 3 documentation generation with Oauth2 authentication in Swagger UI: https://github.com/papsign/Ktor-OpenAPI-Generator
 - **ktor-health-check** for health and readiness checks: https://github.com/zensum/ktor-health-check
 - **kotlinx.serialization** for multi-format data serialization: https://github.com/Kotlin/kotlinx.serialization
 - **Keycloak** for application Oauth2 authentication/authorization: https://www.keycloak.org/
@@ -73,9 +87,9 @@ and some other misc stuff:
 ## Prerequisites
 
 - **[Required]** [JDK 16](https://www.oracle.com/java/technologies/javase-jdk16-downloads.html): To run gradle tasks.
-- **[Required]** [Gradle](https://gradle.org/): How the project is built.
-- **[Required]** [Docker](https://www.docker.com/): As this project dependencies is dockerized.
-- **[Required]** [Docker-Compose](https://docs.docker.com/compose/): To run project dependencies.
+- **[Required]** [Gradle 7.0](https://gradle.org/): How the project is built.
+- **[Required]** [Docker 20.10](https://www.docker.com/): As this project dependencies is dockerized.
+- **[Required]** [Docker-Compose 1.29](https://docs.docker.com/compose/): To run project dependencies.
 
 # Running application
 
@@ -99,7 +113,7 @@ You can access the Keycloak UI by this url: http://localhost:8180/
 * **Username**: admin
 * **Password**: admin
 
-After that, in the UI interface you need to create a new user and write down the credential to use later. It is also necessary to note the client credential **KtorApp**.
+After that, in the UI interface you need to create a new user and write down the credential to use later. It is also necessary to note the client credential **KtorApp**. https://www.keycloak.org/docs/latest/server_installation/
 
 Then build the application with the command below:
 
@@ -120,7 +134,7 @@ Authorize the user with the Keycloak data annotated in the previous step.
 
 To run the unit and integration tests on all modules, run the following command:
 
-```
+```shell
 ./gradlew test
 ```
 
