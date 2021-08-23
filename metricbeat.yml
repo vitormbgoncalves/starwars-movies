@@ -11,12 +11,11 @@ output.elasticsearch:
 setup.kibana:
   host: '${KIBANA_HOSTS:kibana:5601}'
 
-
 metricbeat.modules:
   - module: prometheus
     period: 10s
     metricsets: [ "collector" ]
-    hosts: [ "prometheus_star_wars:9090" ]
+    hosts: [ "host.docker.internal:8080" ]
     metrics_path: /metrics
 
 setup.ilm.enabled: false

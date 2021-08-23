@@ -113,23 +113,21 @@ enum class Scopes(override val description: String) : Described {
 }
 
 private val providerUrl = ConfigFactory.load("application.conf").getString("OAuth2.providerUrl")
-private val clientId = ConfigFactory.load("application.conf").getString("OAuth2.clientId")
-private val clientSecret = ConfigFactory.load("application.conf").getString("OAuth2.clientSecret")
 
 private val oauthProvider = OAuth2ServerSettings(
   name = "Ktor-OAuth2",
-  authorizeUrl = providerUrl + "authorize",
-  accessTokenUrl = providerUrl + "oauth/token",
+  authorizeUrl = providerUrl + "auth/realms/Ktor/protocol/openid-connect/auth",
+  accessTokenUrl = providerUrl + "auth/realms/Ktor/protocol/openid-connect/token",
   requestMethod = HttpMethod.Post,
-  clientId = clientId,
-  clientSecret = clientSecret,
-  defaultScopes = listOf(Scopes.openid.toString())
+  clientId = "",
+  clientSecret = "",
+  defaultScopes = listOf()
 )
 
 var oauth: OAuth2Handler<OAuthAccessTokenResponse, Scopes> =
   OAuth2Handler(
     oauthProvider,
-    passwordScopes = listOf()
+    passwordScopes = listOf(Scopes.openid)
   ) { (accessToken, tokenType, expiresIn, refreshToken, extraParameters) ->
     OAuth2(
       accessToken, tokenType, expiresIn, refreshToken, extraParameters
