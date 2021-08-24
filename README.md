@@ -9,7 +9,7 @@ applications in Kotlin and also to be used as a foundation for future projects.
 
 # [Live demo](https://starwars-movies-catalog.herokuapp.com/)
 
-An example from the `starwars-movies-catalog` is deployed on [Heroku](https://starwars-movies-catalog.herokuapp.com/), using [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) for database, [OAuth0](https://auth0.com/) for OAuth2 authentication/authorization and [Redis Labs](https://redis.com/) for caching.
+An example from the `starwars-movies-catalog` is deployed on [Heroku](https://starwars-movies-catalog.herokuapp.com/), using [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) for database, [auth0](https://auth0.com/) for OAuth2 authentication/authorization and [Redis Labs](https://redis.com/) for caching.
 
 You can access the Swagger UI by this url: [https://starwars-movies-catalog.herokuapp.com/](https://starwars-movies-catalog.herokuapp.com/).
 To interact with Swagger UI it is necessary to perform authorization with the data below:
