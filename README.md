@@ -1,3 +1,7 @@
+<p align="center">
+  <img width="295" height="123" src="https://repository-images.githubusercontent.com/40136600/f3f5fd00-c59e-11e9-8284-cb297d193133">
+</p>
+
 # RESTful API from the Star Wars movies list
 
 ![Action workflow](https://github.com/vitormbgoncalves/starwars-movies/actions/workflows/codecov.yml/badge.svg)
@@ -44,7 +48,7 @@ So here is a brief overview of each module:
 - **Kotlin 1.5** - our language of choice: https://kotlinlang.org/docs/home.html
 - **ktor** for creating web application: https://github.com/ktorio/ktor
 - **HAL (Hypertext Application Language)**: specification to describe the RESTful resource structure. https://stateless.group/hal_specification.html
-- **Docker** for running dependencies on containers: https://docs.docker.com/ 
+- **Docker** for running dependencies on containers: https://docs.docker.com/
 - **MongoDB** for database: https://www.mongodb.com/
 - **KMongo** for access database: //https://github.com/Litote/kmongo
 - **Jackson** for JSON serialization/deserialization: https://github.com/FasterXML/jackson
@@ -56,6 +60,7 @@ So here is a brief overview of each module:
 - **ktor-health-check** for health and readiness checks: https://github.com/zensum/ktor-health-check
 - **kotlinx.serialization** for multi-format data serialization: https://github.com/Kotlin/kotlinx.serialization
 - **Keycloak** for application Oauth2 authentication/authorization: https://www.keycloak.org/
+- **GitHub Actions** for application CI/CD and automated workflows: https://github.com/features/actions
 
 and for testing:
 - **Spek2** framework for application testing: https://github.com/spekframework/spek
@@ -76,7 +81,7 @@ and for monitoring:
 - **Grafana** for observability and data visualization from prometheus data: https://github.com/grafana/grafana
 - **Jaeger** for application tracing: https://github.com/jaegertracing/jaeger
 - **ELK Stack (Elasticsearch, Logstash, kibana)** for logs ingestion, processing and visualization: https://www.elastic.co/
- 
+
 and some other misc stuff:
 - **Ktlint** for code checkstyle, linting and formatter: https://github.com/pinterest/ktlint
 - **Detekt** for static code smell analysis: https://github.com/detekt/detekt
